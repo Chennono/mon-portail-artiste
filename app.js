@@ -1,4 +1,8 @@
 const STORAGE_KEY = "mon-portail-artiste-chat-fr-v2";
+// URL du service de publication (Cloudflare Worker). À renseigner après déploiement,
+// ex. "https://mon-portail-artiste-publish.VOTRE-SOUS-DOMAINE.workers.dev".
+// Laisser vide désactive le bouton « Publier » (le reste de l'app fonctionne).
+const PUBLISH_ENDPOINT = "https://mon-portail-artiste-publish.artiste-personnalise.workers.dev";
 const IDB_NAME = "mon-portail-artiste-db";
 const IDB_STORE = "kv";
 const IMAGES_KEY = "images";
@@ -130,6 +134,7 @@ const I18N = {
     "share.copied": "Link copied! Paste it anywhere — it opens your page directly.",
     "share.copiedNoImg": "Link copied! Uploaded photos aren't included (link too long); text and style are. For a page with photos, use \"Export HTML\".",
     "share.needPage": "Create your page first, then copy the shareable link.",
+    "publish.btn": "Publish (link with photos)", "publish.inProgress": "Publishing…", "publish.done": "Page published! The link (with your photos) is copied.", "publish.failed": "Publishing failed:", "publish.needPage": "Create your page first, then publish it.", "publish.notConfigured": "The publishing service is not configured yet.",
     "studio.intro": "Go at your own pace: tell us about your background, your works, your goals. The assistant prepares a clear draft — generated locally in your browser by default — that you can review, edit and export.",
     "hero.problem": "Today, many performing-arts professionals only exist online through social networks and their algorithms. A personal portal gives you back a stable space of your own to show your work.",
     "trust.unofficial": "Unofficial", "trust.rgaa": "RGAA accessibility", "trust.human": "Human validation", "trust.export": "Exportable",
@@ -220,6 +225,7 @@ const I18N = {
     "share.copied": "链接已复制!粘贴到任何地方都能直接打开你的页面。",
     "share.copiedNoImg": "链接已复制!上传的照片未包含(链接过长),但文本和样式已包含。需要带照片的页面请用“导出 HTML”。",
     "share.needPage": "请先创建页面,再复制可分享链接。",
+    "publish.btn": "发布(含照片的链接)", "publish.inProgress": "发布中……", "publish.done": "页面已发布!含照片的链接已复制。", "publish.failed": "发布失败:", "publish.needPage": "请先创建页面,再发布。", "publish.notConfigured": "发布服务尚未配置。",
     "studio.intro": "按自己的节奏来:讲讲你的经历、作品和愿望。助手会准备一份清晰的草稿——默认在你的浏览器本地生成——你可以审阅、修改并导出。",
     "hero.problem": "如今,许多演艺从业者只能通过社交网络及其算法在线“存在”。一个个人门户让你重新拥有一个属于自己的稳定空间来展示作品。",
     "trust.unofficial": "非官方", "trust.rgaa": "RGAA 无障碍", "trust.human": "人工审核", "trust.export": "可导出",
@@ -372,7 +378,13 @@ function captureFrench() {
     "share.publicLabel": "Lien public (si vous hébergez la page vous-même)",
     "share.copied": "Lien copié ! Collez-le n'importe où : il ouvre votre page directement.",
     "share.copiedNoImg": "Lien copié ! Les photos importées ne sont pas incluses (lien trop long) ; les textes et le style le sont. Pour une page avec photos, utilisez « Exporter HTML ».",
-    "share.needPage": "Créez d'abord votre page, puis copiez le lien partageable."
+    "share.needPage": "Créez d'abord votre page, puis copiez le lien partageable.",
+    "publish.btn": "Publier (lien avec photos)",
+    "publish.inProgress": "Publication…",
+    "publish.done": "Page publiée ! Le lien (avec vos photos) est copié.",
+    "publish.failed": "La publication a échoué :",
+    "publish.needPage": "Créez d'abord votre page, puis publiez-la.",
+    "publish.notConfigured": "Le service de publication n'est pas encore configuré."
   });
 }
 
@@ -847,6 +859,8 @@ function bindEvents() {
     button.addEventListener("click", () => copyShareText(button.dataset.copyShare));
   });
   $("#copyInstantLinkBtn").addEventListener("click", copyInstantLink);
+  $("#publishBtn").addEventListener("click", publishPage);
+  if (!PUBLISH_ENDPOINT) $("#publishBtn").hidden = true;
   document.addEventListener("selectionchange", trackPreviewSelection);
   document.addEventListener("mousedown", maybeHideTextToolbar);
   document.addEventListener("dragover", updateModuleAutoScroll);
@@ -2764,16 +2778,8 @@ function reviewConfirmed() {
   );
 }
 
-async function exportHtml() {
-  if (!reviewConfirmed()) return;
-  const exportBtn = $("#exportHtmlBtn");
-  try {
-    setBusy(exportBtn, true, "Export en cours…");
-    if (!state.draft) {
-      await generatePortal();
-      if (!state.draft) return;
-    }
-    const html = `<!doctype html>
+function buildPortalHtmlDocument() {
+  return `<!doctype html>
 <html lang="fr">
 <head>
   <meta charset="utf-8">
@@ -2786,10 +2792,65 @@ ${exportFontLinks()}  <style>${exportCss()}</style>
   <main class="portal-preview style-${state.pageStyle} motion-${state.motionStyle} layout-${state.layout}${state.palette ? " palette-custom" : ""}${state.fontTitle !== "default" ? " title-font-custom" : ""}${state.fontBody !== "default" ? " body-font-custom" : ""}"${previewInlineStyle()}>${getSerializablePreviewHtml()}</main>
 </body>
 </html>`;
+}
+
+async function exportHtml() {
+  if (!reviewConfirmed()) return;
+  const exportBtn = $("#exportHtmlBtn");
+  try {
+    setBusy(exportBtn, true, "Export en cours…");
+    if (!state.draft) {
+      await generatePortal();
+      if (!state.draft) return;
+    }
+    const html = buildPortalHtmlDocument();
     download(`${slugify(state.draft.name)}-artist-portal.html`, html, "text/html");
     warnExportWeight(html);
   } finally {
     setBusy(exportBtn, false);
+  }
+}
+
+async function publishPage() {
+  if (!state.draft) {
+    setStatus(t("publish.needPage"));
+    return;
+  }
+  if (!PUBLISH_ENDPOINT) {
+    setStatus(t("publish.notConfigured"));
+    return;
+  }
+  if (!reviewConfirmed()) return;
+  const button = $("#publishBtn");
+  try {
+    setBusy(button, true, t("publish.inProgress"));
+    const html = buildPortalHtmlDocument();
+    const response = await fetch(`${PUBLISH_ENDPOINT.replace(/\/$/, "")}/publish`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ html })
+    });
+    if (!response.ok) {
+      const detail = await response.json().catch(() => ({}));
+      throw new Error(detail.error || `HTTP ${response.status}`);
+    }
+    const payload = await response.json();
+    state.shareUrl = payload.url;
+    $("#portalPublicUrl").value = payload.url;
+    renderShareKit({ keepUrlInput: true });
+    persist();
+    await copyText(payload.url, t("publish.done"));
+  } catch (error) {
+    setStatus(`${t("publish.failed")} ${error.message}`);
+  } finally {
+    setBusy(button, false);
+  }
+}
+
+function warnExportWeight(html) {
+  const sizeMo = new Blob([html]).size / (1024 * 1024);
+  if (sizeMo >= 2) {
+    setStatus(`Fichier HTML exporté (~${sizeMo.toFixed(1)} Mo). Les images sont intégrées dans le fichier : pour un site en ligne, préférez des images séparées et optimisées.`);
   }
 }
 
