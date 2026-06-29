@@ -559,23 +559,6 @@ body.view-mode .portal-preview {
   min-width: 118px;
 }
 
-.seo-fold > summary {
-  cursor: pointer;
-  font-weight: 700;
-  color: var(--muted);
-  list-style: revert;
-}
-
-.seo-fold .seo-hint {
-  font-weight: 400;
-  font-size: 0.8em;
-  opacity: 0.8;
-}
-
-.seo-fold[open] > summary {
-  margin-bottom: 0.5rem;
-}
-
 .works-input {
   margin-top: 0.85rem;
   padding: 0.5rem 0.75rem 0.75rem;
@@ -587,6 +570,38 @@ body.view-mode .portal-preview {
   padding: 0 0.3rem;
   font-size: 0.92rem;
   font-weight: 500;
+}
+
+.social-inputs {
+  margin-top: 0.85rem;
+  padding: 0.65rem 0.75rem 0.8rem;
+  border: 1px solid var(--line);
+  border-radius: 4px;
+}
+
+.social-inputs legend {
+  padding: 0 0.3rem;
+  font-size: 0.92rem;
+  font-weight: 600;
+}
+
+.social-input-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.65rem;
+}
+
+.social-input-grid label {
+  display: grid;
+  gap: 0.3rem;
+  margin: 0;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.module-seo,
+.seo-fold {
+  display: none !important;
 }
 
 .work-input {
@@ -1554,6 +1569,42 @@ body.reduce-motion .portal-preview * {
   padding: 0.85rem;
 }
 
+.social-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.55rem;
+  margin-top: 0.8rem;
+}
+
+.social-link {
+  display: inline-grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 4px;
+  color: white;
+  text-decoration: none;
+  transition: transform 150ms ease, box-shadow 150ms ease;
+}
+
+.social-link:hover,
+.social-link:focus-visible {
+  color: white;
+  transform: translateY(-2px);
+  box-shadow: 0 3px 0 rgba(0, 0, 0, 0.2);
+}
+
+.social-link svg {
+  width: 21px;
+  height: 21px;
+}
+
+.social-instagram { background: #c13584; }
+.social-linkedin { background: #0a66c2; }
+.social-facebook { background: #1877f2; }
+.social-tiktok { background: #111; }
+.social-youtube { background: #e62117; }
+
 .side-box {
   margin-bottom: 0.8rem;
   background: #f7f7ff;
@@ -1977,7 +2028,8 @@ body.reduce-motion .portal-preview * {
   .composer-tools,
   .design-tools,
   .page-editor-toolbar,
-  .info-grid {
+  .info-grid,
+  .social-input-grid {
     grid-template-columns: 1fr;
   }
 

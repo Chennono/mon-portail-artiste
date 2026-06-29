@@ -218,6 +218,27 @@
               <label for="extraField" id="extraFieldLabel">Formation & distinctions (optionnel)</label>
               <textarea id="extraField" rows="3" placeholder="Ex. : formations, prix, résidences ; ou habilitations (CACES, électrique…) ; ou structures et budgets gérés."></textarea>
 
+              <fieldset class="social-inputs">
+                <legend data-i18n="social.legend">Vos réseaux sociaux (optionnel)</legend>
+                <div class="social-input-grid">
+                  <label for="socialInstagram">Instagram
+                    <input id="socialInstagram" type="text" inputmode="url" autocomplete="url" data-social-input="instagram" data-i18n-ph="social.placeholder" placeholder="@identifiant ou https://…">
+                  </label>
+                  <label for="socialLinkedin">LinkedIn
+                    <input id="socialLinkedin" type="text" inputmode="url" autocomplete="url" data-social-input="linkedin" data-i18n-ph="social.placeholder" placeholder="@identifiant ou https://…">
+                  </label>
+                  <label for="socialFacebook">Facebook
+                    <input id="socialFacebook" type="text" inputmode="url" autocomplete="url" data-social-input="facebook" data-i18n-ph="social.placeholder" placeholder="@identifiant ou https://…">
+                  </label>
+                  <label for="socialTiktok">TikTok
+                    <input id="socialTiktok" type="text" inputmode="url" autocomplete="url" data-social-input="tiktok" data-i18n-ph="social.placeholder" placeholder="@identifiant ou https://…">
+                  </label>
+                  <label for="socialYoutube">YouTube
+                    <input id="socialYoutube" type="text" inputmode="url" autocomplete="url" data-social-input="youtube" data-i18n-ph="social.placeholder" placeholder="@identifiant ou https://…">
+                  </label>
+                </div>
+              </fieldset>
+
               <label for="imageUpload" data-i18n="label.upload">Ajoutez quelques images d'œuvres, si vous le souhaitez</label>
               <input id="imageUpload" type="file" accept="image/*" multiple>
               <div id="imageStrip" class="image-strip" aria-live="polite"></div>

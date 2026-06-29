@@ -7,6 +7,35 @@ const IDB_NAME = "mon-portail-artiste-db";
 const IDB_STORE = "kv";
 const IMAGES_KEY = "images";
 const SpeechRecognitionApi = window.SpeechRecognition || window.webkitSpeechRecognition;
+const EMPTY_SOCIAL_LINKS = { instagram: "", linkedin: "", facebook: "", tiktok: "", youtube: "" };
+
+const SOCIAL_PLATFORMS = {
+  instagram: {
+    label: "Instagram",
+    profileBase: "https://www.instagram.com/",
+    icon: '<rect width="20" height="20" x="2" y="2" rx="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><path d="M17.5 6.5h.01"/>'
+  },
+  linkedin: {
+    label: "LinkedIn",
+    profileBase: "https://www.linkedin.com/in/",
+    icon: '<path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-4 0v7h-4v-7a6 6 0 0 1 6-6z"/><path d="M2 9h4v12H2z"/><circle cx="4" cy="4" r="2"/>'
+  },
+  facebook: {
+    label: "Facebook",
+    profileBase: "https://www.facebook.com/",
+    icon: '<path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/>'
+  },
+  tiktok: {
+    label: "TikTok",
+    profileBase: "https://www.tiktok.com/@",
+    icon: '<circle cx="8" cy="18" r="4"/><path d="M12 18V2l7 4"/>'
+  },
+  youtube: {
+    label: "YouTube",
+    profileBase: "https://www.youtube.com/@",
+    icon: '<path d="M2.5 17a24 24 0 0 1 0-10 2 2 0 0 1 1.4-1.4 50 50 0 0 1 16.2 0A2 2 0 0 1 21.5 7a24 24 0 0 1 0 10 2 2 0 0 1-1.4 1.4 50 50 0 0 1-16.2 0A2 2 0 0 1 2.5 17z"/><path d="m10 15 5-3-5-3z"/>'
+  }
+};
 
 const state = {
   messages: [],
@@ -14,6 +43,7 @@ const state = {
   images: [],
   audience: [],
   works: [],
+  socialLinks: { ...EMPTY_SOCIAL_LINKS },
   palette: null,
   paletteIntensity: 0.35,
   person: "third",
@@ -130,6 +160,7 @@ const I18N = {
     "extra.technicien.label": "Certifications & licences (optional)", "extra.technicien.q": "Which certifications or licences do you hold? (rigging, electrical, first-aid, driving…)",
     "extra.gestion.label": "Organisations & budgets (optional)", "extra.gestion.q": "Which organisations have you worked with, and which budgets or projects have you managed?",
     "seo.hint": "(meta — not shown publicly)",
+    "social.legend": "Your social networks (optional)", "social.placeholder": "@handle or https://…",
     "share.instantLabel": "Link to share — no hosting needed", "share.instantBtn": "Copy shareable link",
     "share.instantNote": "This link opens your page directly in the browser. Perfect to send by message or email.",
     "share.publicLabel": "Public link (if you host the page yourself)",
@@ -223,6 +254,7 @@ const I18N = {
     "extra.technicien.label": "资质与认证(可选)", "extra.technicien.q": "你持有哪些资质或认证?(高空作业、电工、消防、驾照……)",
     "extra.gestion.label": "机构与预算(可选)", "extra.gestion.q": "你与哪些机构合作过,管理过哪些预算或项目?",
     "seo.hint": "(元信息 · 不公开显示)",
+    "social.legend": "你的社交网络（可选）", "social.placeholder": "@用户名 或 https://…",
     "share.instantLabel": "可分享链接 — 无需任何托管", "share.instantBtn": "复制可分享链接",
     "share.instantNote": "此链接直接在浏览器中打开你的页面。适合用消息或邮件发送。",
     "share.publicLabel": "公开链接(如果你自己托管页面)",
@@ -378,6 +410,8 @@ function captureFrench() {
     "extra.gestion.label": "Structures & budgets (optionnel)",
     "extra.gestion.q": "Avec quelles structures avez-vous travaillé, et quels budgets ou projets avez-vous gérés ?",
     "seo.hint": "(méta — non affiché publiquement)",
+    "social.legend": "Vos réseaux sociaux (optionnel)",
+    "social.placeholder": "@identifiant ou https://…",
     "share.instantLabel": "Lien à partager — aucun hébergement nécessaire",
     "share.instantBtn": "Copier le lien partageable",
     "share.instantNote": "Ce lien ouvre votre page directement dans le navigateur. Parfait pour l'envoyer par message ou mail.",
@@ -432,6 +466,7 @@ function applyLanguage(lang) {
   renderStyleGallery();
   renderPaletteSwatches();
   renderWorksInput();
+  renderSocialInputs();
   renderMessages();
   syncExtraLabel();
   renderShareKit();
@@ -825,6 +860,7 @@ function bindEvents() {
   $("#titleFont").addEventListener("change", updateFonts);
   $("#bodyFont").addEventListener("change", updateFonts);
   $("#addWorkInputBtn").addEventListener("click", addWorkInput);
+  $$('[data-social-input]').forEach((input) => input.addEventListener("input", updateSocialLinks));
   $("#addModuleBtn").addEventListener("click", addModuleFromToolbar);
   $("#boldTextBtn").addEventListener("click", toggleBoldText);
   $("#italicTextBtn").addEventListener("click", toggleItalicText);
@@ -1362,6 +1398,7 @@ function buildLocalDraft() {
     keywords,
     works,
     links: profile.links,
+    socialLinks: normalizeSocialLinks(state.socialLinks),
     complianceNote: "Brouillon assisté par IA. Avant publication, l'artiste doit vérifier les faits, les droits d'image et le ton du texte.",
     updatedAt: new Date().toISOString()
   };
@@ -1447,7 +1484,8 @@ function normalizeDraft(payload) {
     ...payload,
     works: Array.isArray(payload.works) ? payload.works : local.works,
     keywords: Array.isArray(payload.keywords) ? payload.keywords : local.keywords,
-    links: Array.isArray(payload.links) ? payload.links : local.links
+    links: Array.isArray(payload.links) ? payload.links : local.links,
+    socialLinks: local.socialLinks
   };
 }
 
@@ -1531,6 +1569,7 @@ function normalizeStyle(style) {
 function ensureDraftModules(draft) {
   if (!draft) return [];
   draft.fieldStyles = normalizeStyle(draft.fieldStyles);
+  draft.socialLinks = normalizeSocialLinks(draft.socialLinks || state.socialLinks);
   if (!draft.sections) {
     draft.sections = { statement: "Présentation", works: "Œuvres sélectionnées", bio: "Repères professionnels" };
   }
@@ -1542,14 +1581,12 @@ function ensureDraftModules(draft) {
       { id: makeModuleId(), type: "text", legacy: "bio", zone: "side", title: draft.sections.bio || "Repères professionnels", body: draft.bio || "" },
       ...(draft.extra ? [{ id: makeModuleId(), type: "text", legacy: "extra", zone: "side", title: draft.extraHeading || "Informations complémentaires", body: draft.extra }] : []),
       { id: makeModuleId(), type: "text", legacy: "goals", zone: "side", title: "Objectifs", body: draft.goals || "" },
-      { id: makeModuleId(), type: "contact", legacy: "contact", zone: "side", title: "Contact", body: draft.contact || "", links: draft.links || [] },
-      { id: makeModuleId(), type: "seo", legacy: "seo", zone: "side", title: "SEO", body: draft.seo || "", keywords: draft.keywords || [] }
+      { id: makeModuleId(), type: "contact", legacy: "contact", zone: "side", title: "Contact", body: draft.contact || "", links: draft.links || [] }
     ];
   }
 
-  // Le rappel « À vérifier avant publication » n'est pas une section publique :
-  // il reste sous forme de cases à cocher sous l'aperçu. On le retire de la page.
-  draft.modules = draft.modules.filter((module) => module.legacy !== "complianceNote");
+  // Ces données alimentent les contrôles et les métadonnées, pas la page publique.
+  draft.modules = draft.modules.filter((module) => module.legacy !== "complianceNote" && module.legacy !== "seo" && module.type !== "seo");
 
   draft.modules.forEach((module) => {
     module.id = module.id || makeModuleId();
@@ -1562,7 +1599,6 @@ function ensureDraftModules(draft) {
     module.styles.body = normalizeStyle(module.styles.body);
     if (module.type === "contact") module.links = Array.isArray(module.links) ? module.links : draft.links || [];
     if (module.type === "links") module.links = Array.isArray(module.links) ? module.links : draft.links || [];
-    if (module.type === "seo") module.keywords = Array.isArray(module.keywords) ? module.keywords : draft.keywords || [];
   });
 
   return draft.modules;
@@ -1574,7 +1610,6 @@ function defaultModuleTitle(type) {
     works: "Œuvres",
     contact: "Contact",
     links: "Liens utiles",
-    seo: "Résumé",
     note: "Note"
   }[type] || "Module";
 }
@@ -1633,7 +1668,6 @@ function syncModuleToDraft(module, field) {
     state.draft[module.legacy] = module.body;
   }
   if (module.type === "contact") state.draft.contact = module.body;
-  if (module.type === "seo") state.draft.seo = module.body;
 }
 
 function renderModuleToolbar(module) {
@@ -1658,12 +1692,9 @@ function renderModule(module) {
   if (module.type === "works") {
     content = `${title}<div class="work-grid">${renderWorks(state.draft.works || [])}</div><button id="addWorkBtn" type="button" class="button secondary preview-only add-work">+ Ajouter une œuvre</button>`;
   } else if (module.type === "contact") {
-    content = `${title}${body}${renderLinks(module.links || state.draft.links || [])}`;
+    content = `${title}${body}${renderSocialLinks(state.draft.socialLinks)}${renderLinks(module.links || state.draft.links || [])}`;
   } else if (module.type === "links") {
     content = `${title}${body}${renderLinks(module.links || state.draft.links || [])}`;
-  } else if (module.type === "seo") {
-    const keywords = Array.isArray(module.keywords) ? module.keywords : state.draft.keywords || [];
-    content = `<details class="seo-fold"><summary>${escapeHtml(module.title)} <span class="seo-hint">${escapeHtml(t("seo.hint"))}</span></summary>${body}<ul class="tag-list">${keywords.map((tag) => `<li>${escapeHtml(tag)}</li>`).join("")}</ul></details>`;
   } else {
     content = `${title}${body}`;
   }
@@ -2389,6 +2420,50 @@ function renderLinks(links = []) {
   return `<ul>${links.map((link) => `<li><a href="${escapeAttribute(link)}" target="_blank" rel="noreferrer">${escapeHtml(link)}</a></li>`).join("")}</ul>`;
 }
 
+function normalizeSocialLinks(value = {}) {
+  return Object.fromEntries(Object.keys(SOCIAL_PLATFORMS).map((key) => [key, clean(value?.[key] || "")]));
+}
+
+function socialProfileHref(platform, rawValue) {
+  const config = SOCIAL_PLATFORMS[platform];
+  const value = clean(rawValue);
+  if (!config || !value) return "";
+  if (/^https?:\/\//i.test(value)) return value;
+  if (/^(?:www\.)?(?:instagram\.com|linkedin\.com|facebook\.com|fb\.com|tiktok\.com|youtube\.com|youtu\.be)\//i.test(value)) return `https://${value}`;
+  const handle = value.replace(/^@/, "").replace(/^\/+|\/+$/g, "");
+  return handle ? `${config.profileBase}${encodeURIComponent(handle)}` : "";
+}
+
+function renderSocialLinks(socialLinks = {}) {
+  const items = Object.entries(SOCIAL_PLATFORMS)
+    .map(([key, config]) => ({ key, config, href: socialProfileHref(key, socialLinks[key]) }))
+    .filter((item) => item.href);
+  if (!items.length) return "";
+  return `<nav class="social-links" aria-label="Réseaux sociaux">${items
+    .map(
+      ({ key, config, href }) =>
+        `<a class="social-link social-${key}" href="${escapeAttribute(href)}" target="_blank" rel="noreferrer" aria-label="${escapeAttribute(config.label)}" title="${escapeAttribute(config.label)}"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${config.icon}</svg></a>`
+    )
+    .join("")}</nav>`;
+}
+
+function renderSocialInputs() {
+  $$('[data-social-input]').forEach((input) => {
+    input.value = state.socialLinks[input.dataset.socialInput] || "";
+  });
+}
+
+function updateSocialLinks(event) {
+  const key = event.target.dataset.socialInput;
+  if (!SOCIAL_PLATFORMS[key]) return;
+  state.socialLinks[key] = event.target.value.trim();
+  if (state.draft) {
+    state.draft.socialLinks = normalizeSocialLinks(state.socialLinks);
+    renderPreview();
+  }
+  persist();
+}
+
 function suggestedPortalUrl() {
   const host = window.location.hostname;
   const isLocal = !host || host === "localhost" || host === "127.0.0.1" || host === "::1";
@@ -2942,7 +3017,7 @@ function exportFontLinks() {
 
 function getSerializablePreviewHtml() {
   const clone = preview.cloneNode(true);
-  clone.querySelectorAll(".edit-hint, .preview-only").forEach((node) => node.remove());
+  clone.querySelectorAll(".edit-hint, .preview-only, .module-seo, .seo-fold").forEach((node) => node.remove());
   const originalCanvases = Array.from(preview.querySelectorAll("canvas"));
   Array.from(clone.querySelectorAll("canvas")).forEach((canvas, index) => {
     const image = document.createElement("img");
@@ -2969,7 +3044,7 @@ function getSerializablePreviewHtml() {
 }
 
 function exportCss() {
-  return `body{margin:0;font-family:Arial,sans-serif;color:#17201c;background:#fbfaf6;line-height:1.55}.portal-preview{max-width:1100px;margin:0 auto;background:white;overflow:hidden}.portal-hero{display:grid;grid-template-columns:1fr .7fr;gap:1rem;padding:2rem;background:#f4f0e8}.portal-hero h2{font-size:clamp(2rem,5vw,4.4rem);line-height:1.05}.portal-body{display:grid;grid-template-columns:1fr 320px;gap:1rem;padding:2rem}.portal-column{display:grid;gap:.85rem;align-content:start}.module-body{margin-bottom:0}.portal-visual img,.portal-visual canvas,.work-card img{width:100%;display:block;object-fit:cover}.work-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:.8rem}.work-card,.side-box{border:1px solid #d7ded8;padding:.8rem;margin-bottom:.8rem}.generated-note{display:inline-block;background:#fff7d7;border:1px solid #e6c957;padding:.25rem .5rem}.tag-list{display:flex;gap:.4rem;flex-wrap:wrap;padding:0;list-style:none}.tag-list li{background:#e8eee9;border-radius:999px;padding:.3rem .5rem}.style-gallery .portal-hero{grid-template-columns:1fr;background:white}.style-gallery .portal-visual{min-height:360px}.style-gallery .portal-body{grid-template-columns:1fr}.style-gallery .work-grid{grid-template-columns:repeat(auto-fit,minmax(240px,1fr))}.style-editorial{background:#fff8ed}.style-editorial .portal-hero{background:#f5e6cf}.style-editorial .portal-hero h2,.style-editorial h3{font-family:Georgia,"Times New Roman",serif}.style-editorial .side-box{background:transparent;border-width:0 0 0 4px;border-color:#8f5d3f}.style-dark{background:#111716;color:#f4f0e8}.style-dark .portal-hero{background:#17201c}.style-dark .side-box,.style-dark .work-card{background:#18231f;border-color:#34433e}.style-dark p,.style-dark li{color:#d9e0dc}.style-dark .tag-list li{background:#26352f}.motion-subtle .portal-hero,.motion-subtle .portal-section,.motion-subtle .side-box,.motion-subtle .work-card{animation:fadeUp 520ms ease both}.motion-dynamic .portal-hero{animation:fadeUp 700ms ease both}.motion-dynamic .portal-visual img,.motion-dynamic .portal-visual canvas{animation:slowDrift 9s ease-in-out infinite alternate}.motion-dynamic .work-card{animation:floatIn 720ms ease both}.motion-dynamic .work-card:nth-child(2){animation-delay:120ms}.motion-dynamic .work-card:nth-child(3){animation-delay:240ms}.motion-dynamic .generated-note{animation:softPulse 2.4s ease-in-out infinite}.motion-none *{animation:none!important;transition:none!important}@keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}@keyframes floatIn{from{opacity:0;transform:translateY(22px) scale(.98)}to{opacity:1;transform:translateY(0) scale(1)}}@keyframes slowDrift{from{transform:scale(1.01) translate3d(-4px,-3px,0)}to{transform:scale(1.06) translate3d(5px,4px,0)}}@keyframes softPulse{0%,100%{box-shadow:0 0 0 rgba(243,207,90,0)}50%{box-shadow:0 0 0 6px rgba(243,207,90,.24)}}@media(max-width:760px){.portal-hero,.portal-body{grid-template-columns:1fr;padding:1rem}}@media(prefers-reduced-motion:reduce){.portal-preview *{animation:none!important;transition:none!important}}.palette-custom{background:var(--portal-bg)!important;color:var(--portal-ink)!important}.palette-custom .portal-hero{background:var(--portal-hero-bg)!important}.palette-custom .portal-hero p,.palette-custom .portal-section,.palette-custom .portal-section p,.palette-custom .portal-body,.palette-custom .side-box,.palette-custom .side-box p,.palette-custom .work-card,.palette-custom .work-card p{color:var(--portal-ink)!important}.palette-custom .portal-section h3,.palette-custom .side-box h3,.palette-custom .work-card h4{color:var(--portal-accent)!important}.palette-custom .side-box,.palette-custom .work-card{background:var(--portal-surface)!important;border-color:var(--portal-accent-soft)!important}.palette-custom .tag-list li{background:var(--portal-accent-soft)!important;color:var(--portal-ink)!important}.portal-preview.layout-centre .portal-hero,.portal-preview.layout-affiche .portal-hero{grid-template-columns:1fr;text-align:center;justify-items:center}.portal-preview.layout-centre .portal-body,.portal-preview.layout-affiche .portal-body,.portal-preview.layout-mosaique .portal-body,.portal-preview.layout-defilement .portal-body{grid-template-columns:minmax(0,1fr)}.portal-preview.layout-centre .portal-body{max-width:820px;margin:0 auto}.portal-preview.layout-affiche .portal-hero h2{font-size:clamp(3rem,10vw,6.5rem);line-height:1}.portal-preview.layout-mosaique .work-grid{display:block;column-count:3;column-gap:.8rem;grid-template-columns:none}.portal-preview.layout-mosaique .work-card{break-inside:avoid;margin-bottom:.8rem}.portal-preview.layout-mosaique .work-card img,.portal-preview.layout-mosaique .work-card canvas{aspect-ratio:auto;height:auto}.portal-preview.layout-defilement .work-grid{display:flex;grid-template-columns:none;overflow-x:auto;gap:1rem;padding-bottom:.6rem;scroll-snap-type:x mandatory}.portal-preview.layout-defilement .work-card{flex:0 0 clamp(220px,60%,300px);scroll-snap-align:start}@media(max-width:760px){.portal-preview.layout-mosaique .work-grid{column-count:1}}.portal-preview.body-font-custom{font-family:var(--portal-font-body)!important}.portal-preview.title-font-custom .portal-hero h2,.portal-preview.title-font-custom .portal-section h3,.portal-preview.title-font-custom .side-box h3,.portal-preview.title-font-custom .work-card h4,.portal-preview.title-font-custom .portal-hero [data-edit="tagline"]{font-family:var(--portal-font-title)!important}.portal-preview.layout-editorial .portal-body{grid-template-columns:minmax(0,1fr);max-width:900px;margin:0 auto;gap:2.4rem}.portal-preview.layout-editorial .portal-section,.portal-preview.layout-editorial .side-box{border:0;background:transparent;margin:0;padding-left:0;padding-right:0}.portal-preview.layout-editorial .portal-section>h3,.portal-preview.layout-editorial .side-box>h3{font-size:.78rem;text-transform:uppercase;letter-spacing:.1em;font-weight:600;color:#5b6660;margin-bottom:.5rem}.portal-preview.layout-editorial [data-legacy="statement"]>h3{display:none}.portal-preview.layout-editorial [data-legacy="statement"] .module-body{font-size:clamp(1.25rem,2.3vw,1.8rem);line-height:1.5;font-weight:500}.portal-preview.layout-editorial .portal-side{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:1.6rem 2.4rem}`;
+  return `body{margin:0;font-family:Arial,sans-serif;color:#17201c;background:#fbfaf6;line-height:1.55}.portal-preview{max-width:1100px;margin:0 auto;background:white;overflow:hidden}.portal-hero{display:grid;grid-template-columns:1fr .7fr;gap:1rem;padding:2rem;background:#f4f0e8}.portal-hero h2{font-size:clamp(2rem,5vw,4.4rem);line-height:1.05}.portal-body{display:grid;grid-template-columns:1fr 320px;gap:1rem;padding:2rem}.portal-column{display:grid;gap:.85rem;align-content:start}.module-body{margin-bottom:0}.portal-visual img,.portal-visual canvas,.work-card img{width:100%;display:block;object-fit:cover}.work-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:.8rem}.work-card,.side-box{border:1px solid #d7ded8;padding:.8rem;margin-bottom:.8rem}.generated-note{display:inline-block;background:#fff7d7;border:1px solid #e6c957;padding:.25rem .5rem}.tag-list{display:flex;gap:.4rem;flex-wrap:wrap;padding:0;list-style:none}.tag-list li{background:#e8eee9;border-radius:999px;padding:.3rem .5rem}.social-links{display:flex;flex-wrap:wrap;gap:.55rem;margin-top:.8rem}.social-link{display:inline-grid;place-items:center;width:40px;height:40px;border-radius:4px;color:#fff;text-decoration:none;transition:transform .15s ease,box-shadow .15s ease}.social-link:hover,.social-link:focus-visible{transform:translateY(-2px);box-shadow:0 3px 0 rgba(0,0,0,.2)}.social-link svg{width:21px;height:21px}.social-instagram{background:#c13584}.social-linkedin{background:#0a66c2}.social-facebook{background:#1877f2}.social-tiktok{background:#111}.social-youtube{background:#e62117}.style-gallery .portal-hero{grid-template-columns:1fr;background:white}.style-gallery .portal-visual{min-height:360px}.style-gallery .portal-body{grid-template-columns:1fr}.style-gallery .work-grid{grid-template-columns:repeat(auto-fit,minmax(240px,1fr))}.style-editorial{background:#fff8ed}.style-editorial .portal-hero{background:#f5e6cf}.style-editorial .portal-hero h2,.style-editorial h3{font-family:Georgia,"Times New Roman",serif}.style-editorial .side-box{background:transparent;border-width:0 0 0 4px;border-color:#8f5d3f}.style-dark{background:#111716;color:#f4f0e8}.style-dark .portal-hero{background:#17201c}.style-dark .side-box,.style-dark .work-card{background:#18231f;border-color:#34433e}.style-dark p,.style-dark li{color:#d9e0dc}.style-dark .tag-list li{background:#26352f}.motion-subtle .portal-hero,.motion-subtle .portal-section,.motion-subtle .side-box,.motion-subtle .work-card{animation:fadeUp 520ms ease both}.motion-dynamic .portal-hero{animation:fadeUp 700ms ease both}.motion-dynamic .portal-visual img,.motion-dynamic .portal-visual canvas{animation:slowDrift 9s ease-in-out infinite alternate}.motion-dynamic .work-card{animation:floatIn 720ms ease both}.motion-dynamic .work-card:nth-child(2){animation-delay:120ms}.motion-dynamic .work-card:nth-child(3){animation-delay:240ms}.motion-dynamic .generated-note{animation:softPulse 2.4s ease-in-out infinite}.motion-none *{animation:none!important;transition:none!important}@keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}@keyframes floatIn{from{opacity:0;transform:translateY(22px) scale(.98)}to{opacity:1;transform:translateY(0) scale(1)}}@keyframes slowDrift{from{transform:scale(1.01) translate3d(-4px,-3px,0)}to{transform:scale(1.06) translate3d(5px,4px,0)}}@keyframes softPulse{0%,100%{box-shadow:0 0 0 rgba(243,207,90,0)}50%{box-shadow:0 0 0 6px rgba(243,207,90,.24)}}@media(max-width:760px){.portal-hero,.portal-body{grid-template-columns:1fr;padding:1rem}}@media(prefers-reduced-motion:reduce){.portal-preview *{animation:none!important;transition:none!important}}.palette-custom{background:var(--portal-bg)!important;color:var(--portal-ink)!important}.palette-custom .portal-hero{background:var(--portal-hero-bg)!important}.palette-custom .portal-hero p,.palette-custom .portal-section,.palette-custom .portal-section p,.palette-custom .portal-body,.palette-custom .side-box,.palette-custom .side-box p,.palette-custom .work-card,.palette-custom .work-card p{color:var(--portal-ink)!important}.palette-custom .portal-section h3,.palette-custom .side-box h3,.palette-custom .work-card h4{color:var(--portal-accent)!important}.palette-custom .side-box,.palette-custom .work-card{background:var(--portal-surface)!important;border-color:var(--portal-accent-soft)!important}.palette-custom .tag-list li{background:var(--portal-accent-soft)!important;color:var(--portal-ink)!important}.portal-preview.layout-centre .portal-hero,.portal-preview.layout-affiche .portal-hero{grid-template-columns:1fr;text-align:center;justify-items:center}.portal-preview.layout-centre .portal-body,.portal-preview.layout-affiche .portal-body,.portal-preview.layout-mosaique .portal-body,.portal-preview.layout-defilement .portal-body{grid-template-columns:minmax(0,1fr)}.portal-preview.layout-centre .portal-body{max-width:820px;margin:0 auto}.portal-preview.layout-affiche .portal-hero h2{font-size:clamp(3rem,10vw,6.5rem);line-height:1}.portal-preview.layout-mosaique .work-grid{display:block;column-count:3;column-gap:.8rem;grid-template-columns:none}.portal-preview.layout-mosaique .work-card{break-inside:avoid;margin-bottom:.8rem}.portal-preview.layout-mosaique .work-card img,.portal-preview.layout-mosaique .work-card canvas{aspect-ratio:auto;height:auto}.portal-preview.layout-defilement .work-grid{display:flex;grid-template-columns:none;overflow-x:auto;gap:1rem;padding-bottom:.6rem;scroll-snap-type:x mandatory}.portal-preview.layout-defilement .work-card{flex:0 0 clamp(220px,60%,300px);scroll-snap-align:start}@media(max-width:760px){.portal-preview.layout-mosaique .work-grid{column-count:1}}.portal-preview.body-font-custom{font-family:var(--portal-font-body)!important}.portal-preview.title-font-custom .portal-hero h2,.portal-preview.title-font-custom .portal-section h3,.portal-preview.title-font-custom .side-box h3,.portal-preview.title-font-custom .work-card h4,.portal-preview.title-font-custom .portal-hero [data-edit="tagline"]{font-family:var(--portal-font-title)!important}.portal-preview.layout-editorial .portal-body{grid-template-columns:minmax(0,1fr);max-width:900px;margin:0 auto;gap:2.4rem}.portal-preview.layout-editorial .portal-section,.portal-preview.layout-editorial .side-box{border:0;background:transparent;margin:0;padding-left:0;padding-right:0}.portal-preview.layout-editorial .portal-section>h3,.portal-preview.layout-editorial .side-box>h3{font-size:.78rem;text-transform:uppercase;letter-spacing:.1em;font-weight:600;color:#5b6660;margin-bottom:.5rem}.portal-preview.layout-editorial [data-legacy="statement"]>h3{display:none}.portal-preview.layout-editorial [data-legacy="statement"] .module-body{font-size:clamp(1.25rem,2.3vw,1.8rem);line-height:1.5;font-weight:500}.portal-preview.layout-editorial .portal-side{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:1.6rem 2.4rem}`;
 }
 
 function clearLocalData() {
@@ -2981,6 +3056,7 @@ function clearLocalData() {
   state.images = [];
   state.audience = [];
   state.works = [];
+  state.socialLinks = { ...EMPTY_SOCIAL_LINKS };
   state.palette = null;
   state.paletteIntensity = 0.35;
   state.person = "third";
@@ -3015,6 +3091,7 @@ function clearLocalData() {
   $("#bgIntensity").value = 35;
   renderPaletteSwatches();
   renderWorksInput();
+  renderSocialInputs();
   renderMessages();
   renderPreview();
   renderImages();
@@ -3029,6 +3106,7 @@ function persist() {
     draft: state.draft,
     audience: state.audience,
     works: state.works,
+    socialLinks: state.socialLinks,
     palette: state.palette,
     paletteIntensity: state.paletteIntensity,
     person: state.person,
@@ -3070,6 +3148,7 @@ function loadState() {
     state.images = saved.images || []; // ancien format : images encore dans localStorage
     state.audience = saved.audience || [];
     state.works = saved.works || [];
+    state.socialLinks = normalizeSocialLinks(saved.socialLinks || saved.draft?.socialLinks);
     state.palette = saved.palette || null;
     state.paletteIntensity = typeof saved.paletteIntensity === "number" ? saved.paletteIntensity : 0.35;
     state.person = saved.person || "third";

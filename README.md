@@ -32,7 +32,7 @@ Fonctions incluses:
 - generation locale d'un brouillon de portail a partir de la conversation;
 - choix de la voix du texte: premiere personne ("je") ou troisieme personne (au nom de l'artiste);
 - envoi du message a la touche Entree (style messagerie), Maj+Entree pour un retour a la ligne (saisie IME chinois/japonais protegee);
-- module SEO replie par defaut dans l'apercu (meta non affichee publiquement, toujours editable et reprise dans les balises de l'export);
+- SEO conserve uniquement dans la balise `meta description` de la page : aucun module SEO n'est affiche dans l'apercu ou le portail publie;
 - modification et suppression de chaque message deja envoye dans la conversation;
 - bouton "Effacer la saisie" pour vider le champ de message en cours;
 - edition en place signalee dans l'apercu (textes cliquables et modifiables);
@@ -41,6 +41,7 @@ Fonctions incluses:
 - saisie libre des oeuvres dans le composer (titre, annee, medium, description libre), prioritaire sur l'extraction automatique du texte;
 - gestion des oeuvres: ajout, suppression et edition directe (titre, annee, medium, description);
 - gestion des images: suppression unitaire, texte alternatif editable, association explicite a une oeuvre ou au visuel principal;
+- saisie optionnelle des profils Instagram, LinkedIn, Facebook, TikTok et YouTube (lien complet ou `@identifiant`), affiches sous forme de logos cliquables dans le module Contact du portail;
 - choix de style visuel: calme professionnel, galerie, editorial, sombre immersif;
 - mise en page de la page generee (independante du style de couleur): editorial/revue (par defaut), colonnes (standard), une colonne centree, affiche (titre geant), mosaique (masonry), defilement horizontal des oeuvres. Memorisee et incluse dans l'export HTML;
 - la mise en page "editorial" (par defaut) reduit l'effet CV: presentation transformee en grande accroche sans etiquette, libelles de section en petits intertitres discrets, encadres plats et aeres;
