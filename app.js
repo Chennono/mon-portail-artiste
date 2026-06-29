@@ -67,7 +67,8 @@ const state = {
   guided: { active: false, step: 0 },
   guidedAnswers: {},
   extra: "",
-  speak: false
+  speak: false,
+  aiEnabled: true
 };
 
 const GUIDED_QUESTIONS = [
@@ -178,7 +179,7 @@ const I18N = {
     "publish.btn": "Publish my page", "publish.updateBtn": "Update my published page", "publish.inProgress": "Publishing…", "publish.done": "Your page is online! Its permanent link has been copied.", "publish.updated": "Your page has been updated at the same address. The link has been copied.", "publish.failed": "Publishing failed:", "publish.needPage": "Create your page first, then publish it.", "publish.notConfigured": "The publishing service is not configured yet.", "publish.reviewRequired": "Before publishing, please tick the three verification boxes below.", "publish.ready": "Everything is ready. You can publish your page.", "publish.urlLabel": "Your personal address", "publish.copyBtn": "Copy link", "publish.copied": "Permanent link copied.",
     "publish.unpublishBtn": "Unpublish", "publish.unpublishConfirm": "Permanently remove your page online? The link will stop working.", "publish.unpublishing": "Removing…", "publish.unpublished": "Your online page has been removed.", "publish.unpublishFailed": "Removal failed:", "publish.nothingToUnpublish": "No published page to remove.",
     "publish.turnstileNeeded": "Please tick the anti-bot box before publishing.",
-    "cv.btn": "Import a CV", "cv.prefix": "Here is my CV, help me turn it into a page:", "cv.reading": "Reading the CV…", "cv.imported": "CV imported. Preparing your page from its content…", "cv.empty": "I couldn't read any text (scanned image CV?). Try a text-based PDF/Word, or type your info.", "cv.unsupported": "Unsupported format. Use a PDF, Word (.docx) or text file.", "cv.docOld": "Old .doc files aren't read. Save as .docx or PDF and try again.", "cv.failed": "Reading the CV failed:",
+    "cv.btn": "Import a CV", "cv.scan": "Scan a CV", "cv.privacy": "The photo is read locally in your browser. Only recognised text may be sent to Mistral when AI is enabled.", "cv.prefix": "Here is my CV, help me turn it into a page:", "cv.reading": "Reading the CV…", "cv.ocr": "Local text recognition…", "cv.imported": "CV imported. Preparing your page from its content…", "cv.empty": "I couldn't recognise enough text. Try a sharper, well-lit photo or type your information.", "cv.unsupported": "Unsupported format. Use a PDF, Word (.docx), image or text file.", "cv.docOld": "Old .doc files aren't read. Save as .docx or PDF and try again.", "cv.failed": "Reading the CV failed:",
     "cmd.applied": "Done — I applied:", "cmd.bgDark": "dark background", "cmd.bgLight": "light background", "cmd.fontHand": "handwritten font", "cmd.fontSerif": "serif font", "cmd.fontSans": "sans-serif font",
     "studio.intro": "Go at your own pace: tell us about your background, your works, your goals. The Mistral assistant prepares a clear draft that you can review, edit and export.",
     "hero.problem": "Today, many performing-arts professionals only exist online through social networks and their algorithms. A personal portal gives you back a stable space of your own to show your work.",
@@ -200,7 +201,7 @@ const I18N = {
     "audience.curators": "Curators", "audience.galleries": "Galleries", "audience.residencies": "Residencies", "audience.institutions": "Institutions", "audience.collectors": "Collectors", "audience.public": "General public",
     "label.upload": "Add a few images of your works, if you wish",
     "btn.sample": "See an example", "btn.advice": "Ask for advice",
-    "ai.badge": "Mistral AI",
+    "ai.badge": "Mistral AI", "ai.on": "AI enabled", "ai.off": "AI disabled", "ai.enabledStatus": "AI enabled: your conversation text may be sent to Mistral. Artwork images always remain in your browser.", "ai.disabledStatus": "AI disabled: conversation, CV and page generation now remain local in your browser.",
     "advanced.summary": "Advanced option: use another endpoint",
     "advanced.label": "Alternative AI endpoint (optional)",
     "advanced.note": "Mistral is already connected securely. This field is only for technical testing; never place an API key here.",
@@ -277,7 +278,7 @@ const I18N = {
     "publish.btn": "发布我的页面", "publish.updateBtn": "更新已发布页面", "publish.inProgress": "正在发布……", "publish.done": "个人页面已上线，固定网址已复制。", "publish.updated": "页面已在同一网址更新，链接已复制。", "publish.failed": "发布失败:", "publish.needPage": "请先创建个人页面，再进行发布。", "publish.notConfigured": "发布服务尚未配置。", "publish.reviewRequired": "发布前，请先勾选下方三个确认选项。", "publish.ready": "准备完成，现在可以发布页面。", "publish.urlLabel": "你的个人网址", "publish.copyBtn": "复制链接", "publish.copied": "固定网址已复制。",
     "publish.unpublishBtn": "取消发布", "publish.unpublishConfirm": "确定要永久下线你的页面吗?该链接将失效。", "publish.unpublishing": "正在删除……", "publish.unpublished": "你的在线页面已下线。", "publish.unpublishFailed": "删除失败:", "publish.nothingToUnpublish": "没有可下线的已发布页面。",
     "publish.turnstileNeeded": "发布前请先勾选人机验证。",
-    "cv.btn": "导入简历", "cv.prefix": "这是我的简历,帮我做成一个页面:", "cv.reading": "正在读取简历……", "cv.imported": "简历已导入。正在根据内容生成你的页面……", "cv.empty": "没能读取到文字(可能是扫描图片简历?)。请用文字版 PDF/Word,或直接输入信息。", "cv.unsupported": "不支持的格式。请使用 PDF、Word(.docx)或文本文件。", "cv.docOld": "旧版 .doc 文件无法读取。请另存为 .docx 或 PDF 后重试。", "cv.failed": "读取简历失败:",
+    "cv.btn": "导入简历", "cv.scan": "扫描简历", "cv.privacy": "照片仅在浏览器本地识别。只有在 AI 开启时，识别出的文字才可能发送给 Mistral。", "cv.prefix": "这是我的简历,帮我做成一个页面:", "cv.reading": "正在读取简历……", "cv.ocr": "正在本地识别文字……", "cv.imported": "简历已导入。正在根据内容生成你的页面……", "cv.empty": "未能识别到足够文字。请使用清晰、光线充足的照片，或直接输入信息。", "cv.unsupported": "不支持的格式。请使用 PDF、Word(.docx)、图片或文本文件。", "cv.docOld": "旧版 .doc 文件无法读取。请另存为 .docx 或 PDF 后重试。", "cv.failed": "读取简历失败:",
     "cmd.applied": "已完成,我应用了:", "cmd.bgDark": "深色背景", "cmd.bgLight": "浅色背景", "cmd.fontHand": "手写字体", "cmd.fontSerif": "衬线字体", "cmd.fontSans": "无衬线字体",
     "studio.intro": "按自己的节奏来:讲讲你的经历、作品和愿望。Mistral 助手会准备一份清晰的草稿,你可以审阅、修改并导出。",
     "hero.problem": "如今,许多演艺从业者只能通过社交网络及其算法在线“存在”。一个个人门户让你重新拥有一个属于自己的稳定空间来展示作品。",
@@ -299,7 +300,7 @@ const I18N = {
     "audience.curators": "策展人", "audience.galleries": "画廊", "audience.residencies": "驻地项目", "audience.institutions": "机构", "audience.collectors": "收藏家", "audience.public": "大众",
     "label.upload": "如果愿意,可添加几张作品图片",
     "btn.sample": "查看示例", "btn.advice": "请求建议",
-    "ai.badge": "Mistral AI",
+    "ai.badge": "Mistral AI", "ai.on": "AI 已开启", "ai.off": "AI 已关闭", "ai.enabledStatus": "AI 已开启:对话文字可能发送给 Mistral；作品图片始终保留在浏览器中。", "ai.disabledStatus": "AI 已关闭:对话、简历和页面生成均在浏览器本地完成。",
     "advanced.summary": "高级选项:使用其他端点",
     "advanced.label": "备用 AI 端点(可选)",
     "advanced.note": "Mistral 已安全接入。此处仅用于技术测试,请勿在此填写 API 密钥。",
@@ -458,13 +459,20 @@ function captureFrench() {
     "publish.nothingToUnpublish": "Aucune page publiée à retirer.",
     "publish.turnstileNeeded": "Cochez la case anti-robot avant de publier.",
     "cv.btn": "Importer un CV",
+    "cv.scan": "Scanner un CV",
+    "cv.privacy": "La photo est lue localement dans votre navigateur. Seul le texte reconnu peut être envoyé à Mistral lorsque l'IA est activée.",
     "cv.prefix": "Voici mon CV, aide-moi à en faire une page :",
     "cv.reading": "Lecture du CV…",
+    "cv.ocr": "Reconnaissance locale du texte…",
     "cv.imported": "CV importé. Je prépare votre page à partir de son contenu…",
-    "cv.empty": "Je n'ai pas réussi à lire de texte (CV scanné en image ?). Essayez un PDF/Word texte, ou saisissez vos infos.",
-    "cv.unsupported": "Format non pris en charge. Utilisez un PDF, un Word (.docx) ou un fichier texte.",
+    "cv.empty": "Je n'ai pas reconnu assez de texte. Essayez une photo plus nette et bien éclairée, ou saisissez vos informations.",
+    "cv.unsupported": "Format non pris en charge. Utilisez un PDF, un Word (.docx), une image ou un fichier texte.",
     "cv.docOld": "Les anciens fichiers .doc ne sont pas lus. Enregistrez en .docx ou en PDF, puis réessayez.",
     "cv.failed": "La lecture du CV a échoué :",
+    "ai.on": "IA activée",
+    "ai.off": "IA désactivée",
+    "ai.enabledStatus": "IA activée : le texte de votre conversation peut être envoyé à Mistral. Les images d'œuvres restent toujours dans votre navigateur.",
+    "ai.disabledStatus": "IA désactivée : la conversation, le CV et la génération de page restent maintenant dans votre navigateur.",
     "cmd.applied": "C'est fait, j'ai appliqué :",
     "cmd.bgDark": "fond sombre",
     "cmd.bgLight": "fond clair",
@@ -500,6 +508,7 @@ function applyLanguage(lang) {
   if (voiceBtn) voiceBtn.textContent = state.listening ? t("voice.stop") : t("btn.dictate");
   const guidedBtn = $("#guidedBtn");
   if (guidedBtn) guidedBtn.textContent = state.guided.active ? t("guided.stop") : t("guided.start");
+  updateAiToggle();
   renderStyleGallery();
   renderPaletteSwatches();
   renderWorksInput();
@@ -518,6 +527,24 @@ function refreshVoiceBadge() {
   const badge = $("#voiceBadge");
   if (!badge) return;
   badge.textContent = SpeechRecognitionApi ? t("voice.available") : t("voice.unavailable");
+}
+
+function updateAiToggle() {
+  const button = $("#aiModeToggle");
+  const label = $("#aiModeLabel");
+  if (!button || !label) return;
+  button.classList.toggle("is-on", state.aiEnabled);
+  button.classList.toggle("is-off", !state.aiEnabled);
+  button.setAttribute("aria-pressed", String(state.aiEnabled));
+  button.setAttribute("aria-label", state.aiEnabled ? t("ai.on") : t("ai.off"));
+  label.textContent = state.aiEnabled ? t("ai.on") : t("ai.off");
+}
+
+function toggleAiMode() {
+  state.aiEnabled = !state.aiEnabled;
+  updateAiToggle();
+  persist();
+  setStatus(t(state.aiEnabled ? "ai.enabledStatus" : "ai.disabledStatus"));
 }
 
 function renderStyleGallery() {
@@ -887,6 +914,8 @@ function bindEvents() {
   $("#voiceBtn").addEventListener("click", toggleVoiceInput);
   $("#imageUpload").addEventListener("change", handleImages);
   $("#cvUpload").addEventListener("change", handleCvUpload);
+  $("#cvCameraUpload").addEventListener("change", handleCvUpload);
+  $("#aiModeToggle").addEventListener("click", toggleAiMode);
   $("#pageStyle").addEventListener("change", updateDesignChoice);
   $("#motionStyle").addEventListener("change", updateDesignChoice);
   $("#personStyle").addEventListener("change", updatePerson);
@@ -1275,7 +1304,9 @@ async function sendMessage() {
   try {
     setBusy(sendBtn, true, "Analyse en cours…");
     setBusy(composerSendBtn, true, "Envoi…");
-    try {
+    if (!state.aiEnabled) {
+      state.messages.push({ role: "assistant", content: localAssistantReply() });
+    } else try {
       const payload = await requestAi("chat", buildChatPrompt());
       state.messages.push({ role: "assistant", content: payload.reply || localAssistantReply() });
     } catch {
@@ -1284,7 +1315,7 @@ async function sendMessage() {
 
     renderMessages();
     persist();
-    setStatus("Vous pouvez ajouter une précision, ou créer une première version de la page.");
+    setStatus(state.aiEnabled ? "Vous pouvez ajouter une précision, ou créer une première version de la page." : t("ai.disabledStatus"));
   } finally {
     setBusy(sendBtn, false);
     setBusy(composerSendBtn, false);
@@ -1309,8 +1340,11 @@ async function generatePortal() {
 
   try {
     setBusy(generateBtn, true, "Création en cours…");
-    try {
-      const payload = await requestAi("generate", buildGenerationPrompt(), { images: summarizeImages() });
+    if (!state.aiEnabled) {
+      state.draft = buildLocalDraft();
+      setStatus(t("ai.disabledStatus"));
+    } else try {
+      const payload = await requestAi("generate", buildGenerationPrompt());
       state.draft = normalizeDraft(payload);
       setStatus("La page créée avec Mistral est prête. Prenez le temps de vérifier les faits, les images et le ton avant toute publication.");
     } catch {
@@ -1939,7 +1973,6 @@ function renderPreview() {
     <p class="edit-hint" role="note">Astuce : cliquez sur un texte pour le modifier ou le styliser. Déplacez les modules avec les flèches ou par glisser-déposer.</p>
     <header class="portal-hero">
       <div>
-        <span class="generated-note">Brouillon assisté par IA · modifiable</span>
         <h2 contenteditable="true" data-edit="name" data-style-key="field:name"${styleAttr(draft.fieldStyles?.name)}>${escapeHtml(draft.name)}</h2>
         <p contenteditable="true" data-edit="tagline" data-style-key="field:tagline"${styleAttr(draft.fieldStyles?.tagline)}>${escapeHtml(draft.tagline)}</p>
         ${draft.location ? `<p contenteditable="true" data-edit="location" data-style-key="field:location"${styleAttr(draft.fieldStyles?.location)}><strong>${escapeHtml(draft.location)}</strong></p>` : ""}
@@ -2968,6 +3001,74 @@ async function extractDocxText(file) {
   return result.value || "";
 }
 
+let tesseractLoader;
+function ensureTesseract() {
+  if (window.Tesseract) return Promise.resolve(window.Tesseract);
+  if (tesseractLoader) return tesseractLoader;
+  tesseractLoader = new Promise((resolve, reject) => {
+    const script = document.createElement("script");
+    script.src = "https://cdn.jsdelivr.net/npm/tesseract.js@7/dist/tesseract.min.js";
+    script.onload = () => resolve(window.Tesseract);
+    script.onerror = () => reject(new Error("OCR indisponible"));
+    document.head.append(script);
+  });
+  return tesseractLoader;
+}
+
+function ocrLang() {
+  if (currentLang === "zh") return "chi_sim+eng";
+  if (currentLang === "en") return "eng";
+  return "fra+eng";
+}
+
+function reportOcrProgress(message) {
+  if (message.status === "recognizing text") {
+    setStatus(`${t("cv.ocr")} ${Math.round((message.progress || 0) * 100)}%`);
+  }
+}
+
+async function createOcrWorker() {
+  const tess = await ensureTesseract();
+  return tess.createWorker(ocrLang(), 1, { logger: reportOcrProgress });
+}
+
+async function ocrImageSource(source, worker) {
+  const { data } = await worker.recognize(source);
+  return data.text || "";
+}
+
+async function ocrPdf(file) {
+  const lib = await ensurePdfJs();
+  const pdf = await lib.getDocument({ data: await file.arrayBuffer() }).promise;
+  const pages = Math.min(pdf.numPages, 5);
+  const worker = await createOcrWorker();
+  try {
+    let text = "";
+    for (let i = 1; i <= pages; i += 1) {
+      setStatus(`${t("cv.ocr")} (${i}/${pages})`);
+      const page = await pdf.getPage(i);
+      const viewport = page.getViewport({ scale: 2 });
+      const canvas = document.createElement("canvas");
+      canvas.width = viewport.width;
+      canvas.height = viewport.height;
+      await page.render({ canvasContext: canvas.getContext("2d"), viewport }).promise;
+      text += `${await ocrImageSource(canvas, worker)}\n`;
+    }
+    return text;
+  } finally {
+    await worker.terminate();
+  }
+}
+
+async function ocrImage(file) {
+  const worker = await createOcrWorker();
+  try {
+    return await ocrImageSource(file, worker);
+  } finally {
+    await worker.terminate();
+  }
+}
+
 async function handleCvUpload(event) {
   const file = event.target.files && event.target.files[0];
   event.target.value = "";
@@ -2978,10 +3079,13 @@ async function handleCvUpload(event) {
     let text = "";
     if (name.endsWith(".pdf") || file.type === "application/pdf") {
       text = await extractPdfText(file);
+      if (clean(text).length < 30) text = await ocrPdf(file);
     } else if (name.endsWith(".docx")) {
       text = await extractDocxText(file);
     } else if (name.endsWith(".txt") || file.type === "text/plain") {
       text = await file.text();
+    } else if (file.type.startsWith("image/")) {
+      text = await ocrImage(file);
     } else if (name.endsWith(".doc")) {
       setStatus(t("cv.docOld"));
       return;
@@ -3162,6 +3266,7 @@ function buildGenerationPrompt() {
 }
 
 async function requestAi(mode, prompt, extra = {}) {
+  if (!state.aiEnabled) throw new Error("AI disabled");
   const endpoint = $("#llmEndpoint").value.trim() || AI_ENDPOINT;
   const response = await fetch(endpoint, {
     method: "POST",
@@ -3417,9 +3522,11 @@ function clearLocalData() {
   state.extra = "";
   $("#extraField").value = "";
   state.speak = false;
+  state.aiEnabled = true;
   if (window.speechSynthesis) window.speechSynthesis.cancel();
   $("#speakToggle").checked = false;
   $("#guidedBtn").textContent = t("guided.start");
+  updateAiToggle();
   state.pageStyle = "minimal";
   state.motionStyle = "subtle";
   messageInput.value = "";
@@ -3462,6 +3569,7 @@ function persist() {
     guidedAnswers: state.guidedAnswers,
     extra: state.extra,
     speak: state.speak,
+    aiEnabled: state.aiEnabled,
     pageStyle: state.pageStyle,
     motionStyle: state.motionStyle,
     endpoint: $("#llmEndpoint").value.trim()
@@ -3508,6 +3616,7 @@ function loadState() {
     state.extra = saved.extra || "";
     $("#extraField").value = state.extra;
     state.speak = !!saved.speak;
+    state.aiEnabled = saved.aiEnabled !== false;
     $("#speakToggle").checked = state.speak;
     $("#guidedBtn").textContent = state.guided.active ? "Quitter le mode guidé" : "Conversation guidée";
     state.pageStyle = saved.pageStyle || "minimal";
@@ -3517,6 +3626,7 @@ function loadState() {
     $("#personStyle").value = state.person;
     $("#layoutStyle").value = state.layout;
     $("#llmEndpoint").value = saved.endpoint || "";
+    updateAiToggle();
     $$(".audience-tag").forEach((checkbox) => {
       checkbox.checked = state.audience.includes(checkbox.value);
     });

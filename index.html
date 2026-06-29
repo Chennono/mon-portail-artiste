@@ -17,7 +17,7 @@
 
     <title>Mon Portail Artiste - creer son portail avec l'aide de l'IA</title>
     <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
-    <link rel="stylesheet" href="styles.css?v=20260629-2">
+    <link rel="stylesheet" href="styles.css?v=20260629-3">
   </head>
   <body>
     <a class="skip-link" href="#main" data-i18n="skip">Aller au contenu principal</a>
@@ -78,7 +78,10 @@
                 <h3 id="chat-title" data-i18n="chat.title">Parlez de votre travail</h3>
               </div>
               <div class="panel-badges">
-                <span class="badge ai-badge" data-i18n="ai.badge">Mistral AI</span>
+                <button id="aiModeToggle" class="badge ai-badge is-on" type="button" aria-pressed="true">
+                  <span class="ai-toggle-dot" aria-hidden="true"></span>
+                  <span id="aiModeLabel">IA activée</span>
+                </button>
                 <span id="voiceBadge" class="badge">Vérification du micro...</span>
               </div>
             </div>
@@ -98,9 +101,12 @@
               <div class="guided-bar">
                 <button id="guidedBtn" class="button secondary" type="button" data-i18n="guided.start">Conversation guidée</button>
                 <label for="cvUpload" class="button secondary cv-btn" data-i18n="cv.btn">Importer un CV</label>
-                <input id="cvUpload" type="file" accept=".pdf,.txt,.doc,.docx,application/pdf,text/plain" hidden>
+                <input id="cvUpload" type="file" accept=".pdf,.txt,.doc,.docx,image/*,application/pdf,text/plain" hidden>
+                <label for="cvCameraUpload" class="button secondary cv-btn" data-i18n="cv.scan">Scanner un CV</label>
+                <input id="cvCameraUpload" type="file" accept="image/*" capture="environment" hidden>
                 <label class="speak-toggle"><input type="checkbox" id="speakToggle"> <span data-i18n="guided.speak">Lire les questions à voix haute</span></label>
               </div>
+              <p class="cv-privacy" data-i18n="cv.privacy">La photo est lue localement dans votre navigateur. Seul le texte reconnu peut être envoyé à Mistral lorsque l'IA est activée.</p>
 
               <label for="artistMessage" data-i18n="label.message">Racontez ce que vous voulez mettre en avant</label>
               <textarea id="artistMessage" rows="8" data-i18n-ph="placeholder.message" placeholder="Exemple : Je m'appelle Lina Moreau, je suis artiste visuelle à Marseille. Je travaille la peinture, la photographie et l'installation textile. Mes œuvres parlent de mémoire familiale, d'écologie urbaine et d'objets du quotidien. J'aimerais que cette page s'adresse aux commissaires d'exposition, galeries, résidences et institutions culturelles."></textarea>
@@ -483,6 +489,6 @@
       </div>
     </template>
 
-    <script src="app.js?v=20260629-2"></script>
+    <script src="app.js?v=20260629-3"></script>
   </body>
 </html>

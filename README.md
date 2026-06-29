@@ -62,6 +62,8 @@ Fonctions incluses:
 - en mode guide, une reponse dictee est envoyee automatiquement a la fin de la dictee, et les questions peuvent etre lues a voix haute (synthese vocale, optionnelle);
 - saisie vocale directement dans le message de chat;
 - connexion Mistral par defaut, sans cle API exposee dans le navigateur, et endpoint alternatif optionnel pour les tests;
+- bouton pour activer ou desactiver completement Mistral; en mode desactive, conversation, CV et generation restent locales;
+- import de photos de CV et OCR local dans le navigateur avec Tesseract.js; les images ne sont jamais envoyees a Mistral;
 - import d'images local, stocke dans IndexedDB (resiste aux limites de localStorage);
 - etats de chargement et boutons desactives pendant la generation/export;
 - garde-fou: confirmation avant export/impression si la liste de verification n'est pas cochee;

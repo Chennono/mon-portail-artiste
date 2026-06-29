@@ -477,6 +477,13 @@ p {
   cursor: pointer;
 }
 
+.cv-privacy {
+  margin: -0.2rem 0 0.75rem;
+  color: var(--muted);
+  font-size: 0.84rem;
+  line-height: 1.45;
+}
+
 .speak-toggle input {
   width: auto;
   margin: 0;
@@ -515,8 +522,7 @@ body.view-mode .review-note,
 body.view-mode #shareKitPanel,
 body.view-mode #pageEditorToolbar,
 body.view-mode .art-rail,
-body.view-mode .edit-hint,
-body.view-mode .generated-note {
+body.view-mode .edit-hint {
   display: none !important;
 }
 
@@ -922,9 +928,30 @@ textarea {
 }
 
 .ai-badge {
+  appearance: none;
+  gap: 0.4rem;
   color: #161616;
   background: #f6c600;
   border-color: #d7b000;
+  cursor: pointer;
+}
+
+.ai-badge.is-off {
+  color: #4a4a4a;
+  background: #eeeeee;
+  border-color: #929292;
+}
+
+.ai-toggle-dot {
+  width: 0.55rem;
+  height: 0.55rem;
+  border-radius: 50%;
+  background: #18753c;
+  box-shadow: 0 0 0 2px #fff;
+}
+
+.ai-badge.is-off .ai-toggle-dot {
+  background: #777;
 }
 
 .advanced summary {
@@ -1114,10 +1141,6 @@ textarea {
 
 .portal-preview.motion-dynamic .work-card:nth-child(3) {
   animation-delay: 240ms;
-}
-
-.portal-preview.motion-dynamic .generated-note {
-  animation: softPulse 2.4s ease-in-out infinite;
 }
 
 .portal-preview.motion-none *,
@@ -1506,17 +1529,6 @@ body.reduce-motion .portal-preview * {
 
 .portal-hero p {
   color: var(--muted);
-}
-
-.generated-note {
-  display: inline-flex;
-  margin-bottom: 0.8rem;
-  padding: 0.35rem 0.55rem;
-  background: #fff7d7;
-  border: 1px solid #e6c957;
-  border-radius: 4px;
-  font-size: 0.86rem;
-  font-weight: 500;
 }
 
 .portal-visual,
