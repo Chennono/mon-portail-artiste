@@ -366,57 +366,11 @@
                 <div>
                   <p class="eyebrow">Étape 3 · Partage</p>
                   <h3 id="share-kit-title">Partager mon portail</h3>
-                  <p>Préparez des textes et visuels pour vos réseaux. Rien n'est publié automatiquement : vous gardez toujours la main.</p>
-                </div>
-                <div class="share-kit-actions">
-                  <button id="nativeShareBtn" class="button secondary" type="button">Partager</button>
-                  <button id="downloadSocialCardBtn" class="button secondary" type="button">Carte visuelle</button>
-                  <button id="downloadShareKitBtn" class="button secondary" type="button">Kit social</button>
+                  <p data-i18n="share.publishNote">Publiez votre page avec ses images, puis récupérez immédiatement un lien à partager.</p>
                 </div>
               </div>
-
-              <div class="instant-share">
-                <p class="instant-share-label" data-i18n="share.instantLabel">Lien à partager — aucun hébergement nécessaire</p>
-                <div class="actions compact">
-                  <button id="copyInstantLinkBtn" class="button primary" type="button" data-i18n="share.instantBtn">Copier le lien partageable</button>
-                  <button id="publishBtn" class="button secondary" type="button" data-i18n="publish.btn">Publier (lien avec photos)</button>
-                  <span class="share-note" data-i18n="share.instantNote">Ce lien ouvre votre page directement dans le navigateur. Parfait pour l'envoyer par message ou mail.</span>
-                </div>
-              </div>
-
-              <label class="share-url-field" for="portalPublicUrl">
-                <span data-i18n="share.publicLabel">Lien public (si vous hébergez la page vous-même)</span>
-                <input id="portalPublicUrl" type="url" placeholder="https://votre-site.example/portfolio">
-              </label>
-              <div class="actions compact">
-                <button id="copyPortalUrlBtn" class="button secondary" type="button">Copier le lien</button>
-                <span class="share-note">À coller dans LinkedIn, Instagram bio, Facebook, TikTok bio ou Clap Talents.</span>
-              </div>
-
-              <div class="share-grid">
-                <article>
-                  <h4>LinkedIn</h4>
-                  <textarea id="shareLinkedinText" rows="7" readonly></textarea>
-                  <button class="button secondary" type="button" data-copy-share="shareLinkedinText">Copier</button>
-                </article>
-                <article>
-                  <h4>Instagram bio</h4>
-                  <textarea id="shareInstagramText" rows="7" readonly></textarea>
-                  <button class="button secondary" type="button" data-copy-share="shareInstagramText">Copier</button>
-                </article>
-                <article>
-                  <h4>Facebook</h4>
-                  <textarea id="shareFacebookText" rows="7" readonly></textarea>
-                  <button class="button secondary" type="button" data-copy-share="shareFacebookText">Copier</button>
-                </article>
-                <article>
-                  <h4>TikTok bio</h4>
-                  <textarea id="shareTiktokText" rows="7" readonly></textarea>
-                  <button class="button secondary" type="button" data-copy-share="shareTiktokText">Copier</button>
-                </article>
-              </div>
-
-              <canvas id="socialCardCanvas" width="1080" height="1080" aria-label="Carte visuelle pour partager le portail"></canvas>
+              <button id="publishBtn" class="button primary publish-link-btn" type="button" data-i18n="publish.btn">Copier le lien de ma page</button>
+              <p class="share-note" data-i18n="share.retentionNote">La page publiée inclut vos images. Le lien reste disponible pendant 90 jours.</p>
             </section>
 
             <div class="review-note">

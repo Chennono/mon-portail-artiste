@@ -1600,10 +1600,7 @@ body.reduce-motion .portal-preview * {
 }
 
 .share-kit-head {
-  display: flex;
-  gap: 1rem;
-  justify-content: space-between;
-  align-items: start;
+  display: block;
 }
 
 .share-kit-head h3 {
@@ -1615,57 +1612,17 @@ body.reduce-motion .portal-preview * {
   color: var(--muted);
 }
 
-.share-kit-actions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.45rem;
-  justify-content: flex-end;
-}
-
-.share-url-field {
-  display: grid;
-  gap: 0.35rem;
-  margin: 0;
-  font-weight: 700;
-}
-
 .share-note {
   align-self: center;
+  margin: -0.35rem 0 0;
   color: var(--muted);
   font-size: 0.85rem;
 }
 
-.share-grid {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 0.75rem;
-}
-
-.share-grid article {
-  display: grid;
-  gap: 0.55rem;
-  padding: 0.75rem;
-  border: 1px solid var(--line);
-  border-radius: 4px;
-  background: white;
-}
-
-.share-grid h4 {
-  margin: 0;
-  color: var(--blue);
-}
-
-.share-grid textarea {
-  min-height: 132px;
-  resize: vertical;
-  font-size: 0.88rem;
-}
-
-#socialCardCanvas {
-  width: min(100%, 340px);
-  border: 1px solid var(--line);
-  border-radius: 4px;
-  background: white;
+.publish-link-btn {
+  width: fit-content;
+  min-height: 48px;
+  padding-inline: 1.15rem;
 }
 
 .review-note label {

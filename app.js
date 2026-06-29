@@ -134,7 +134,9 @@ const I18N = {
     "share.copied": "Link copied! Paste it anywhere — it opens your page directly.",
     "share.copiedNoImg": "Link copied! Uploaded photos aren't included (link too long); text and style are. For a page with photos, use \"Export HTML\".",
     "share.needPage": "Create your page first, then copy the shareable link.",
-    "publish.btn": "Publish (link with photos)", "publish.inProgress": "Publishing…", "publish.done": "Page published! The link (with your photos) is copied.", "publish.failed": "Publishing failed:", "publish.needPage": "Create your page first, then publish it.", "publish.notConfigured": "The publishing service is not configured yet.",
+    "share.publishNote": "Publish your page with its images, then immediately get a link to share.",
+    "share.retentionNote": "The published page includes your images. The link remains available for 90 days.",
+    "publish.btn": "Copy my page link", "publish.inProgress": "Creating the link…", "publish.done": "Your page is online! The link, including your images, has been copied.", "publish.failed": "Publishing failed:", "publish.needPage": "Create your page first, then copy its link.", "publish.notConfigured": "The publishing service is not configured yet.",
     "studio.intro": "Go at your own pace: tell us about your background, your works, your goals. The assistant prepares a clear draft — generated locally in your browser by default — that you can review, edit and export.",
     "hero.problem": "Today, many performing-arts professionals only exist online through social networks and their algorithms. A personal portal gives you back a stable space of your own to show your work.",
     "trust.unofficial": "Unofficial", "trust.rgaa": "RGAA accessibility", "trust.human": "Human validation", "trust.export": "Exportable",
@@ -225,7 +227,9 @@ const I18N = {
     "share.copied": "链接已复制!粘贴到任何地方都能直接打开你的页面。",
     "share.copiedNoImg": "链接已复制!上传的照片未包含(链接过长),但文本和样式已包含。需要带照片的页面请用“导出 HTML”。",
     "share.needPage": "请先创建页面,再复制可分享链接。",
-    "publish.btn": "发布(含照片的链接)", "publish.inProgress": "发布中……", "publish.done": "页面已发布!含照片的链接已复制。", "publish.failed": "发布失败:", "publish.needPage": "请先创建页面,再发布。", "publish.notConfigured": "发布服务尚未配置。",
+    "share.publishNote": "发布包含图片的个人页面，并立即获得可分享链接。",
+    "share.retentionNote": "发布的页面会包含你的图片，链接有效期为 90 天。",
+    "publish.btn": "复制个人网页链接", "publish.inProgress": "正在生成链接……", "publish.done": "个人网页已发布，包含图片的链接已复制。", "publish.failed": "发布失败:", "publish.needPage": "请先创建个人页面，再复制链接。", "publish.notConfigured": "发布服务尚未配置。",
     "studio.intro": "按自己的节奏来:讲讲你的经历、作品和愿望。助手会准备一份清晰的草稿——默认在你的浏览器本地生成——你可以审阅、修改并导出。",
     "hero.problem": "如今,许多演艺从业者只能通过社交网络及其算法在线“存在”。一个个人门户让你重新拥有一个属于自己的稳定空间来展示作品。",
     "trust.unofficial": "非官方", "trust.rgaa": "RGAA 无障碍", "trust.human": "人工审核", "trust.export": "可导出",
@@ -379,11 +383,13 @@ function captureFrench() {
     "share.copied": "Lien copié ! Collez-le n'importe où : il ouvre votre page directement.",
     "share.copiedNoImg": "Lien copié ! Les photos importées ne sont pas incluses (lien trop long) ; les textes et le style le sont. Pour une page avec photos, utilisez « Exporter HTML ».",
     "share.needPage": "Créez d'abord votre page, puis copiez le lien partageable.",
-    "publish.btn": "Publier (lien avec photos)",
-    "publish.inProgress": "Publication…",
-    "publish.done": "Page publiée ! Le lien (avec vos photos) est copié.",
+    "share.publishNote": "Publiez votre page avec ses images, puis récupérez immédiatement un lien à partager.",
+    "share.retentionNote": "La page publiée inclut vos images. Le lien reste disponible pendant 90 jours.",
+    "publish.btn": "Copier le lien de ma page",
+    "publish.inProgress": "Création du lien…",
+    "publish.done": "Votre page est en ligne ! Le lien, avec vos images, a été copié.",
     "publish.failed": "La publication a échoué :",
-    "publish.needPage": "Créez d'abord votre page, puis publiez-la.",
+    "publish.needPage": "Créez d'abord votre page, puis copiez son lien.",
     "publish.notConfigured": "Le service de publication n'est pas encore configuré."
   });
 }
@@ -788,17 +794,12 @@ function bindEvents() {
   });
   $("#sendBtn").addEventListener("click", sendMessage);
   $("#composerSendBtn").addEventListener("click", sendMessage);
-  $("#composerSendBtn").addEventListener("click", sendMessage);
   $("#generateBtn").addEventListener("click", generatePortal);
   $("#exportHtmlBtn").addEventListener("click", () => exportHtml());
   $("#exportJsonBtn").addEventListener("click", exportJson);
   $("#printBtn").addEventListener("click", () => {
     if (reviewConfirmed()) window.print();
   });
-  $("#copyPortalUrlBtn").addEventListener("click", copyPortalUrl);
-  $("#nativeShareBtn").addEventListener("click", nativeSharePortal);
-  $("#downloadSocialCardBtn").addEventListener("click", downloadSocialCard);
-  $("#downloadShareKitBtn").addEventListener("click", downloadShareKit);
   $("#clearBtn").addEventListener("click", clearLocalData);
   $("#voiceBtn").addEventListener("click", toggleVoiceInput);
   $("#imageUpload").addEventListener("change", handleImages);
@@ -850,15 +851,6 @@ function bindEvents() {
   messageInput.addEventListener("input", updateStepper);
 
   $("#llmEndpoint").addEventListener("input", persist);
-  $("#portalPublicUrl").addEventListener("input", (event) => {
-    state.shareUrl = event.target.value.trim();
-    persist();
-    renderShareKit({ keepUrlInput: true });
-  });
-  $$("[data-copy-share]").forEach((button) => {
-    button.addEventListener("click", () => copyShareText(button.dataset.copyShare));
-  });
-  $("#copyInstantLinkBtn").addEventListener("click", copyInstantLink);
   $("#publishBtn").addEventListener("click", publishPage);
   if (!PUBLISH_ENDPOINT) $("#publishBtn").hidden = true;
   document.addEventListener("selectionchange", trackPreviewSelection);
@@ -2433,29 +2425,10 @@ function buildShareTexts() {
   };
 }
 
-function renderShareKit(options = {}) {
+function renderShareKit() {
   const panel = $("#shareKitPanel");
   if (!panel) return;
   panel.hidden = !state.draft;
-  if (!state.draft) return;
-
-  const urlInput = $("#portalPublicUrl");
-  if (urlInput && !options.keepUrlInput && !urlInput.value) {
-    urlInput.value = state.shareUrl || suggestedPortalUrl();
-  }
-
-  const texts = buildShareTexts();
-  const fields = {
-    shareLinkedinText: texts.linkedin,
-    shareInstagramText: texts.instagram,
-    shareFacebookText: texts.facebook,
-    shareTiktokText: texts.tiktok
-  };
-  Object.entries(fields).forEach(([id, value]) => {
-    const field = $(`#${id}`);
-    if (field) field.value = value;
-  });
-  drawSocialCard();
 }
 
 async function copyText(value, message = "Copié.") {
@@ -2836,8 +2809,7 @@ async function publishPage() {
     }
     const payload = await response.json();
     state.shareUrl = payload.url;
-    $("#portalPublicUrl").value = payload.url;
-    renderShareKit({ keepUrlInput: true });
+    renderShareKit();
     persist();
     await copyText(payload.url, t("publish.done"));
   } catch (error) {
@@ -2955,7 +2927,6 @@ function clearLocalData() {
   $("#motionStyle").value = state.motionStyle;
   $("#personStyle").value = state.person;
   $("#layoutStyle").value = state.layout;
-  $("#portalPublicUrl").value = "";
   $$(".audience-tag").forEach((checkbox) => (checkbox.checked = false));
   $("#bgIntensity").value = 35;
   renderPaletteSwatches();
@@ -3037,7 +3008,6 @@ function loadState() {
     $("#motionStyle").value = state.motionStyle;
     $("#personStyle").value = state.person;
     $("#layoutStyle").value = state.layout;
-    $("#portalPublicUrl").value = state.shareUrl;
     $("#llmEndpoint").value = saved.endpoint || "";
     $$(".audience-tag").forEach((checkbox) => {
       checkbox.checked = state.audience.includes(checkbox.value);
