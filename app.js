@@ -11,8 +11,36 @@ const TURNSTILE_SITEKEY = "";
 const IDB_NAME = "mon-portail-artiste-db";
 const IDB_STORE = "kv";
 const IMAGES_KEY = "images";
+const PROFILE_PHOTO_KEY = "profile-photo";
 const SpeechRecognitionApi = window.SpeechRecognition || window.webkitSpeechRecognition;
 const EMPTY_SOCIAL_LINKS = { instagram: "", linkedin: "", facebook: "", tiktok: "", youtube: "" };
+const DEFAULT_PROFILE_PHOTO_SETTINGS = { size: 85, side: "right", focus: "top", shape: "rectangle", frame: "none" };
+const AUDIENCE_OPTIONS = {
+  artiste: [
+    ["les programmateurs et diffuseurs", "audience.programmers"],
+    ["les salles, théâtres et festivals", "audience.venuesFestivals"],
+    ["les galeries et lieux d'exposition", "audience.galleries"],
+    ["les résidences artistiques", "audience.residencies"],
+    ["les institutions culturelles", "audience.institutions"],
+    ["le grand public", "audience.public"]
+  ],
+  technicien: [
+    ["les compagnies et producteurs", "audience.companies"],
+    ["les salles et théâtres", "audience.venues"],
+    ["les festivals", "audience.festivals"],
+    ["les directions techniques", "audience.techDirectors"],
+    ["les prestataires techniques", "audience.providers"],
+    ["les organismes de formation", "audience.training"]
+  ],
+  gestion: [
+    ["les compagnies et artistes", "audience.artistsCompanies"],
+    ["les institutions culturelles", "audience.institutions"],
+    ["les salles et festivals", "audience.venuesFestivals"],
+    ["les financeurs publics", "audience.funders"],
+    ["les partenaires professionnels", "audience.partners"],
+    ["les réseaux culturels", "audience.networks"]
+  ]
+};
 
 const SOCIAL_PLATFORMS = {
   instagram: {
@@ -46,6 +74,8 @@ const state = {
   messages: [],
   draft: null,
   images: [],
+  profilePhoto: null,
+  profilePhotoSettings: { ...DEFAULT_PROFILE_PHOTO_SETTINGS },
   audience: [],
   works: [],
   socialLinks: { ...EMPTY_SOCIAL_LINKS },
@@ -180,6 +210,7 @@ const I18N = {
     "publish.unpublishBtn": "Unpublish", "publish.unpublishConfirm": "Permanently remove your page online? The link will stop working.", "publish.unpublishing": "Removing…", "publish.unpublished": "Your online page has been removed.", "publish.unpublishFailed": "Removal failed:", "publish.nothingToUnpublish": "No published page to remove.",
     "publish.turnstileNeeded": "Please tick the anti-bot box before publishing.",
     "cv.btn": "Import a CV", "cv.scan": "Scan a CV", "cv.privacy": "The photo is read locally in your browser. Only recognised text may be sent to Mistral when AI is enabled.", "cv.prefix": "Here is my CV, help me turn it into a page:", "cv.reading": "Reading the CV…", "cv.ocr": "Local text recognition…", "cv.imported": "CV imported. Preparing your page from its content…", "cv.empty": "I couldn't recognise enough text. Try a sharper, well-lit photo or type your information.", "cv.unsupported": "Unsupported format. Use a PDF, Word (.docx), image or text file.", "cv.docOld": "Old .doc files aren't read. Save as .docx or PDF and try again.", "cv.failed": "Reading the CV failed:",
+    "photo.title": "Personal photo", "photo.note": "It appears near your name and stays in your browser until publication.", "photo.add": "Add my photo", "photo.change": "Change photo", "photo.remove": "Remove", "photo.customize": "Customise the photo", "photo.alt": "Photo description", "photo.defaultAlt": "Portrait of the artist", "photo.size": "Size", "photo.side": "Position", "photo.sideRight": "Right", "photo.sideLeft": "Left", "photo.focus": "Crop", "photo.focusTop": "Face toward the top", "photo.focusCenter": "Centred", "photo.focusBottom": "Toward the bottom", "photo.shape": "Shape", "photo.shapeRectangle": "Rectangle", "photo.shapeRounded": "Rounded corners", "photo.shapeCircle": "Circle", "photo.shapeArch": "Arch", "photo.frame": "Frame", "photo.frameNone": "No frame", "photo.frameThin": "Thin line", "photo.frameDouble": "Double frame", "photo.frameShadow": "Shadow", "photo.added": "Your personal photo has been added.", "photo.removed": "Your personal photo has been removed.",
     "cmd.applied": "Done — I applied:", "cmd.bgDark": "dark background", "cmd.bgLight": "light background", "cmd.fontHand": "handwritten font", "cmd.fontSerif": "serif font", "cmd.fontSans": "sans-serif font",
     "studio.intro": "Go at your own pace: tell us about your background, your works, your goals. The Mistral assistant prepares a clear draft that you can review, edit and export.",
     "hero.problem": "Today, many performing-arts professionals only exist online through social networks and their algorithms. A personal portal gives you back a stable space of your own to show your work.",
@@ -199,6 +230,7 @@ const I18N = {
     "motion.none": "No animation", "motion.subtle": "Soft transitions", "motion.dynamic": "Exhibition effect",
     "audience.legend": "Who is your page for? (optional)",
     "audience.curators": "Curators", "audience.galleries": "Galleries", "audience.residencies": "Residencies", "audience.institutions": "Institutions", "audience.collectors": "Collectors", "audience.public": "General public",
+    "audience.programmers": "Programmers", "audience.venuesFestivals": "Venues & festivals", "audience.companies": "Companies & producers", "audience.venues": "Venues & theatres", "audience.festivals": "Festivals", "audience.techDirectors": "Technical directors", "audience.providers": "Technical providers", "audience.training": "Training bodies", "audience.artistsCompanies": "Artists & companies", "audience.funders": "Public funders", "audience.partners": "Professional partners", "audience.networks": "Cultural networks",
     "label.upload": "Add a few images of your works, if you wish",
     "btn.sample": "See an example", "btn.advice": "Ask for advice",
     "ai.badge": "Mistral AI", "ai.on": "AI enabled", "ai.off": "AI disabled", "ai.enabledStatus": "AI enabled: your conversation text may be sent to Mistral. Artwork images always remain in your browser.", "ai.disabledStatus": "AI disabled: conversation, CV and page generation now remain local in your browser.",
@@ -279,6 +311,7 @@ const I18N = {
     "publish.unpublishBtn": "取消发布", "publish.unpublishConfirm": "确定要永久下线你的页面吗?该链接将失效。", "publish.unpublishing": "正在删除……", "publish.unpublished": "你的在线页面已下线。", "publish.unpublishFailed": "删除失败:", "publish.nothingToUnpublish": "没有可下线的已发布页面。",
     "publish.turnstileNeeded": "发布前请先勾选人机验证。",
     "cv.btn": "导入简历", "cv.scan": "扫描简历", "cv.privacy": "照片仅在浏览器本地识别。只有在 AI 开启时，识别出的文字才可能发送给 Mistral。", "cv.prefix": "这是我的简历,帮我做成一个页面:", "cv.reading": "正在读取简历……", "cv.ocr": "正在本地识别文字……", "cv.imported": "简历已导入。正在根据内容生成你的页面……", "cv.empty": "未能识别到足够文字。请使用清晰、光线充足的照片，或直接输入信息。", "cv.unsupported": "不支持的格式。请使用 PDF、Word(.docx)、图片或文本文件。", "cv.docOld": "旧版 .doc 文件无法读取。请另存为 .docx 或 PDF 后重试。", "cv.failed": "读取简历失败:",
+    "photo.title": "个人照片", "photo.note": "照片会显示在姓名附近，发布前始终保存在浏览器本地。", "photo.add": "添加个人照片", "photo.change": "更换照片", "photo.remove": "删除", "photo.customize": "调整照片", "photo.alt": "照片说明", "photo.defaultAlt": "艺术家肖像", "photo.size": "大小", "photo.side": "位置", "photo.sideRight": "右侧", "photo.sideLeft": "左侧", "photo.focus": "裁切位置", "photo.focusTop": "面部靠上", "photo.focusCenter": "居中", "photo.focusBottom": "靠下", "photo.shape": "形状", "photo.shapeRectangle": "矩形", "photo.shapeRounded": "圆角", "photo.shapeCircle": "圆形", "photo.shapeArch": "拱形", "photo.frame": "外框", "photo.frameNone": "无外框", "photo.frameThin": "细线", "photo.frameDouble": "双线框", "photo.frameShadow": "阴影", "photo.added": "个人照片已添加。", "photo.removed": "个人照片已删除。",
     "cmd.applied": "已完成,我应用了:", "cmd.bgDark": "深色背景", "cmd.bgLight": "浅色背景", "cmd.fontHand": "手写字体", "cmd.fontSerif": "衬线字体", "cmd.fontSans": "无衬线字体",
     "studio.intro": "按自己的节奏来:讲讲你的经历、作品和愿望。Mistral 助手会准备一份清晰的草稿,你可以审阅、修改并导出。",
     "hero.problem": "如今,许多演艺从业者只能通过社交网络及其算法在线“存在”。一个个人门户让你重新拥有一个属于自己的稳定空间来展示作品。",
@@ -298,6 +331,7 @@ const I18N = {
     "motion.none": "无动画", "motion.subtle": "柔和过渡", "motion.dynamic": "展览效果",
     "audience.legend": "你的页面面向谁?(可选)",
     "audience.curators": "策展人", "audience.galleries": "画廊", "audience.residencies": "驻地项目", "audience.institutions": "机构", "audience.collectors": "收藏家", "audience.public": "大众",
+    "audience.programmers": "策划方", "audience.venuesFestivals": "场馆与艺术节", "audience.companies": "剧团与制作方", "audience.venues": "剧场与场馆", "audience.festivals": "艺术节", "audience.techDirectors": "技术总监", "audience.providers": "技术服务商", "audience.training": "培训机构", "audience.artistsCompanies": "艺术家与剧团", "audience.funders": "公共资助方", "audience.partners": "专业合作伙伴", "audience.networks": "文化网络",
     "label.upload": "如果愿意,可添加几张作品图片",
     "btn.sample": "查看示例", "btn.advice": "请求建议",
     "ai.badge": "Mistral AI", "ai.on": "AI 已开启", "ai.off": "AI 已关闭", "ai.enabledStatus": "AI 已开启:对话文字可能发送给 Mistral；作品图片始终保留在浏览器中。", "ai.disabledStatus": "AI 已关闭:对话、简历和页面生成均在浏览器本地完成。",
@@ -362,6 +396,8 @@ function captureFrench() {
     FR[node.dataset.i18nPh] = node.getAttribute("placeholder");
   });
   Object.assign(FR, {
+    "audience.curators": "Commissaires", "audience.galleries": "Galeries", "audience.residencies": "Résidences", "audience.institutions": "Institutions", "audience.collectors": "Collectionneurs", "audience.public": "Grand public",
+    "audience.programmers": "Programmateurs", "audience.venuesFestivals": "Salles & festivals", "audience.companies": "Compagnies & producteurs", "audience.venues": "Salles & théâtres", "audience.festivals": "Festivals", "audience.techDirectors": "Directions techniques", "audience.providers": "Prestataires techniques", "audience.training": "Organismes de formation", "audience.artistsCompanies": "Artistes & compagnies", "audience.funders": "Financeurs publics", "audience.partners": "Partenaires pro", "audience.networks": "Réseaux culturels",
     "btn.create": "Créer ma page",
     "btn.regenerate": "Regénérer la page",
     "voice.stop": "Arrêter la dictée",
@@ -469,6 +505,34 @@ function captureFrench() {
     "cv.unsupported": "Format non pris en charge. Utilisez un PDF, un Word (.docx), une image ou un fichier texte.",
     "cv.docOld": "Les anciens fichiers .doc ne sont pas lus. Enregistrez en .docx ou en PDF, puis réessayez.",
     "cv.failed": "La lecture du CV a échoué :",
+    "photo.title": "Photo personnelle",
+    "photo.note": "Elle apparaît près de votre nom et reste dans votre navigateur jusqu'à la publication.",
+    "photo.add": "Ajouter ma photo",
+    "photo.change": "Changer la photo",
+    "photo.remove": "Supprimer",
+    "photo.customize": "Personnaliser la photo",
+    "photo.alt": "Description de la photo",
+    "photo.defaultAlt": "Portrait de l'artiste",
+    "photo.size": "Taille",
+    "photo.side": "Position",
+    "photo.sideRight": "À droite",
+    "photo.sideLeft": "À gauche",
+    "photo.focus": "Cadrage",
+    "photo.focusTop": "Visage vers le haut",
+    "photo.focusCenter": "Centré",
+    "photo.focusBottom": "Vers le bas",
+    "photo.shape": "Forme",
+    "photo.shapeRectangle": "Rectangle",
+    "photo.shapeRounded": "Angles arrondis",
+    "photo.shapeCircle": "Cercle",
+    "photo.shapeArch": "Arche",
+    "photo.frame": "Encadrement",
+    "photo.frameNone": "Sans cadre",
+    "photo.frameThin": "Trait fin",
+    "photo.frameDouble": "Double cadre",
+    "photo.frameShadow": "Ombre",
+    "photo.added": "Votre photo personnelle a été ajoutée.",
+    "photo.removed": "Votre photo personnelle a été supprimée.",
     "ai.on": "IA activée",
     "ai.off": "IA désactivée",
     "ai.enabledStatus": "IA activée : le texte de votre conversation peut être envoyé à Mistral. Les images d'œuvres restent toujours dans votre navigateur.",
@@ -512,7 +576,9 @@ function applyLanguage(lang) {
   renderStyleGallery();
   renderPaletteSwatches();
   renderWorksInput();
+  renderAudienceOptions();
   renderSocialInputs();
+  renderProfilePhotoEditor();
   renderMessages();
   syncExtraLabel();
   renderShareKit();
@@ -717,6 +783,7 @@ function syncExtraLabel() {
 function updateProfession() {
   state.profession = $("#professionStyle").value;
   syncExtraLabel();
+  renderAudienceOptions();
   persist();
   if (state.draft) {
     state.draft = buildLocalDraft();
@@ -782,7 +849,9 @@ function portalPayload(includeImages) {
     profession: state.profession,
     fontTitle: state.fontTitle,
     fontBody: state.fontBody,
-    images: includeImages ? state.images : []
+    images: includeImages ? state.images : [],
+    profilePhoto: includeImages ? state.profilePhoto : null,
+    profilePhotoSettings: state.profilePhotoSettings
   });
 }
 
@@ -827,7 +896,7 @@ async function copyInstantLink() {
   let param = await encodePortal(portalPayload(true));
   let url = `${base}#p=${param}`;
   let droppedImages = false;
-  if (url.length > 16000 && state.images.length) {
+  if (url.length > 16000 && (state.images.length || state.profilePhoto)) {
     param = await encodePortal(portalPayload(false));
     url = `${base}#p=${param}`;
     droppedImages = true;
@@ -849,6 +918,8 @@ async function enterViewMode(param) {
     state.fontTitle = data.fontTitle || "default";
     state.fontBody = data.fontBody || "default";
     state.images = Array.isArray(data.images) ? data.images : [];
+    state.profilePhoto = data.profilePhoto || null;
+    state.profilePhotoSettings = normalizeProfilePhotoSettings(data.profilePhotoSettings);
     if (!state.draft) throw new Error("draft manquant");
 
     document.body.classList.add("view-mode");
@@ -879,9 +950,11 @@ function init() {
   renderMessages();
   renderPreview();
   renderImages();
+  renderProfilePhotoEditor();
   renderStyleGallery();
   renderPaletteSwatches();
   renderWorksInput();
+  renderAudienceOptions();
   $("#bgIntensity").value = Math.round(state.paletteIntensity * 100);
   if (state.palette) {
     $("#bgColor").value = state.palette.bg;
@@ -913,6 +986,14 @@ function bindEvents() {
   $("#clearBtn").addEventListener("click", clearLocalData);
   $("#voiceBtn").addEventListener("click", toggleVoiceInput);
   $("#imageUpload").addEventListener("change", handleImages);
+  $("#profilePhotoUpload").addEventListener("change", handleProfilePhotoUpload);
+  $("#removeProfilePhotoBtn").addEventListener("click", removeProfilePhoto);
+  $("#profilePhotoAlt").addEventListener("change", updateProfilePhotoAlt);
+  $("#profilePhotoSize").addEventListener("input", updateProfilePhotoSettings);
+  $("#profilePhotoSide").addEventListener("change", updateProfilePhotoSettings);
+  $("#profilePhotoFocus").addEventListener("change", updateProfilePhotoSettings);
+  $("#profilePhotoShape").addEventListener("change", updateProfilePhotoSettings);
+  $("#profilePhotoFrame").addEventListener("change", updateProfilePhotoSettings);
   $("#cvUpload").addEventListener("change", handleCvUpload);
   $("#cvCameraUpload").addEventListener("change", handleCvUpload);
   $("#aiModeToggle").addEventListener("click", toggleAiMode);
@@ -943,7 +1024,7 @@ function bindEvents() {
   $("#clearTextStyleBtn").addEventListener("click", clearActiveTextStyle);
   bindFloatingTextToolbar();
 
-  $$(".audience-tag").forEach((checkbox) => checkbox.addEventListener("change", updateAudience));
+  // Les étiquettes de public sont rendues dynamiquement selon le métier (renderAudienceOptions).
 
   $("#langSwitch").addEventListener("change", (event) => applyLanguage(event.target.value));
 
@@ -1971,14 +2052,14 @@ function renderPreview() {
   $("#shareKitPanel").hidden = false;
   preview.innerHTML = `
     <p class="edit-hint" role="note">Astuce : cliquez sur un texte pour le modifier ou le styliser. Déplacez les modules avec les flèches ou par glisser-déposer.</p>
-    <header class="portal-hero">
+    <header class="portal-hero${state.profilePhoto ? ` has-profile-photo photo-side-${state.profilePhotoSettings.side}` : ""}">
       <div>
         <h2 contenteditable="true" data-edit="name" data-style-key="field:name"${styleAttr(draft.fieldStyles?.name)}>${escapeHtml(draft.name)}</h2>
         <p contenteditable="true" data-edit="tagline" data-style-key="field:tagline"${styleAttr(draft.fieldStyles?.tagline)}>${escapeHtml(draft.tagline)}</p>
         ${draft.location ? `<p contenteditable="true" data-edit="location" data-style-key="field:location"${styleAttr(draft.fieldStyles?.location)}><strong>${escapeHtml(draft.location)}</strong></p>` : ""}
       </div>
       <div class="portal-visual-wrap">
-        <div class="portal-visual">${renderHeroVisual()}</div>
+        <div class="portal-visual${state.profilePhoto ? ` profile-portrait photo-shape-${state.profilePhotoSettings.shape} photo-frame-${state.profilePhotoSettings.frame} photo-focus-${state.profilePhotoSettings.focus}` : ""}"${state.profilePhoto ? ` style="--profile-photo-size:${state.profilePhotoSettings.size}%"` : ""}>${renderHeroVisual()}</div>
         ${heroImageControl()}
       </div>
     </header>
@@ -2483,6 +2564,22 @@ function updateAudience() {
   );
 }
 
+function renderAudienceOptions() {
+  const wrap = $("#audienceOptions");
+  if (!wrap) return;
+  const options = AUDIENCE_OPTIONS[state.profession] || AUDIENCE_OPTIONS.artiste;
+  // Retire les publics qui n'existent plus pour ce métier.
+  const validValues = options.map(([value]) => value);
+  state.audience = state.audience.filter((value) => validValues.includes(value));
+  wrap.innerHTML = options
+    .map(
+      ([value, key]) =>
+        `<label class="chip"><input type="checkbox" class="audience-tag" value="${escapeAttribute(value)}"${state.audience.includes(value) ? " checked" : ""}> <span>${escapeHtml(t(key))}</span></label>`
+    )
+    .join("");
+  $$("#audienceOptions .audience-tag").forEach((checkbox) => checkbox.addEventListener("change", updateAudience));
+}
+
 function updateStepper() {
   const stepper = $("#stepper");
   if (!stepper) return;
@@ -2516,6 +2613,9 @@ function getMotionLabel(value) {
 }
 
 function renderHeroVisual() {
+  if (state.profilePhoto) {
+    return `<img src="${state.profilePhoto.dataUrl}" alt="${escapeHtml(state.profilePhoto.alt || t("photo.defaultAlt"))}">`;
+  }
   const image = resolveHeroImage();
   if (image) {
     return `<img src="${image.dataUrl}" alt="${escapeHtml(image.alt)}">`;
@@ -2538,6 +2638,7 @@ function heroSelectionValue() {
 }
 
 function heroImageControl() {
+  if (state.profilePhoto) return "";
   if (!state.images.length) return "";
   return `<label class="visual-image-control preview-only">Image principale
     <select id="heroImageSelect">${imageOptions(heroSelectionValue())}</select></label>`;
@@ -3110,6 +3211,103 @@ async function handleCvUpload(event) {
   }
 }
 
+function normalizeProfilePhotoSettings(value) {
+  const source = value && typeof value === "object" ? value : {};
+  const size = Math.min(100, Math.max(45, Number(source.size) || DEFAULT_PROFILE_PHOTO_SETTINGS.size));
+  return {
+    size,
+    side: ["left", "right"].includes(source.side) ? source.side : DEFAULT_PROFILE_PHOTO_SETTINGS.side,
+    focus: ["top", "center", "bottom"].includes(source.focus) ? source.focus : DEFAULT_PROFILE_PHOTO_SETTINGS.focus,
+    shape: ["rectangle", "rounded", "circle", "arch"].includes(source.shape) ? source.shape : DEFAULT_PROFILE_PHOTO_SETTINGS.shape,
+    frame: ["none", "thin", "double", "shadow"].includes(source.frame) ? source.frame : DEFAULT_PROFILE_PHOTO_SETTINGS.frame
+  };
+}
+
+async function handleProfilePhotoUpload(event) {
+  const file = event.target.files && event.target.files[0];
+  event.target.value = "";
+  if (!file || !file.type.startsWith("image/")) return;
+  try {
+    const dataUrl = await readCompressedImage(file);
+    state.profilePhoto = { name: file.name, dataUrl, alt: t("photo.defaultAlt") };
+    renderProfilePhotoEditor();
+    renderPreview();
+    persistProfilePhoto();
+    setStatus(t("photo.added"));
+  } catch {
+    setStatus("La photo n'a pas pu être lue. Essayez un fichier JPG, PNG ou WebP.");
+  }
+}
+
+function removeProfilePhoto() {
+  state.profilePhoto = null;
+  $("#profilePhotoUpload").value = "";
+  idbDelete(PROFILE_PHOTO_KEY).catch(() => {});
+  renderProfilePhotoEditor();
+  renderPreview();
+  setStatus(t("photo.removed"));
+}
+
+function updateProfilePhotoAlt(event) {
+  if (!state.profilePhoto) return;
+  state.profilePhoto.alt = event.target.value.trim() || t("photo.defaultAlt");
+  persistProfilePhoto();
+  renderPreview();
+}
+
+function updateProfilePhotoSettings() {
+  state.profilePhotoSettings = normalizeProfilePhotoSettings({
+    size: $("#profilePhotoSize").value,
+    side: $("#profilePhotoSide").value,
+    focus: $("#profilePhotoFocus").value,
+    shape: $("#profilePhotoShape").value,
+    frame: $("#profilePhotoFrame").value
+  });
+  renderProfilePhotoEditor();
+  renderPreview();
+  persist();
+}
+
+function renderProfilePhotoEditor() {
+  const photo = state.profilePhoto;
+  const settings = normalizeProfilePhotoSettings(state.profilePhotoSettings);
+  state.profilePhotoSettings = settings;
+  const label = $("#profilePhotoUploadLabel");
+  const removeButton = $("#removeProfilePhotoBtn");
+  const previewBox = $("#profilePhotoPreview");
+  const thumb = $("#profilePhotoThumb");
+  const options = $("#profilePhotoOptions");
+  if (!label || !removeButton || !previewBox || !thumb || !options) return;
+
+  label.textContent = t(photo ? "photo.change" : "photo.add");
+  removeButton.hidden = !photo;
+  previewBox.hidden = !photo;
+  options.hidden = !photo;
+  if (photo) {
+    thumb.src = photo.dataUrl;
+    thumb.alt = photo.alt || t("photo.defaultAlt");
+    thumb.className = `photo-shape-${settings.shape} photo-frame-${settings.frame} photo-focus-${settings.focus}`;
+    thumb.style.setProperty("--profile-photo-size", `${settings.size}%`);
+    $("#profilePhotoAlt").value = photo.alt || t("photo.defaultAlt");
+  } else {
+    thumb.removeAttribute("src");
+    thumb.alt = "";
+    $("#profilePhotoAlt").value = "";
+  }
+  $("#profilePhotoSize").value = settings.size;
+  $("#profilePhotoSide").value = settings.side;
+  $("#profilePhotoFocus").value = settings.focus;
+  $("#profilePhotoShape").value = settings.shape;
+  $("#profilePhotoFrame").value = settings.frame;
+}
+
+function persistProfilePhoto() {
+  if (!state.profilePhoto) return;
+  idbSet(PROFILE_PHOTO_KEY, state.profilePhoto).catch(() => {
+    setStatus("La photo reste disponible pour cette session, mais le navigateur n'a pas pu la sauvegarder.");
+  });
+}
+
 async function handleImages(event) {
   const files = Array.from(event.target.files || []).slice(0, 6);
   if (!files.length) return;
@@ -3282,7 +3480,7 @@ function exportJson() {
   download(
     "mon-portail-artiste.json",
     JSON.stringify(
-      { messages: state.messages, draft: state.draft, images: summarizeImages(), shareUrl: state.shareUrl, pageStyle: state.pageStyle, motionStyle: state.motionStyle },
+      { messages: state.messages, draft: state.draft, images: summarizeImages(), profilePhoto: state.profilePhoto ? { name: state.profilePhoto.name, alt: state.profilePhoto.alt } : null, profilePhotoSettings: state.profilePhotoSettings, shareUrl: state.shareUrl, pageStyle: state.pageStyle, motionStyle: state.motionStyle },
       null,
       2
     ),
@@ -3497,9 +3695,12 @@ function clearLocalData() {
   if (!window.confirm("Effacer la conversation, le brouillon de page et les images enregistrés localement ?")) return;
   localStorage.removeItem(STORAGE_KEY);
   idbDelete(IMAGES_KEY).catch(() => {});
+  idbDelete(PROFILE_PHOTO_KEY).catch(() => {});
   state.messages = [];
   state.draft = null;
   state.images = [];
+  state.profilePhoto = null;
+  state.profilePhotoSettings = { ...DEFAULT_PROFILE_PHOTO_SETTINGS };
   state.audience = [];
   state.works = [];
   state.socialLinks = { ...EMPTY_SOCIAL_LINKS };
@@ -3535,14 +3736,15 @@ function clearLocalData() {
   $("#motionStyle").value = state.motionStyle;
   $("#personStyle").value = state.person;
   $("#layoutStyle").value = state.layout;
-  $$(".audience-tag").forEach((checkbox) => (checkbox.checked = false));
   $("#bgIntensity").value = 35;
   renderPaletteSwatches();
   renderWorksInput();
+  renderAudienceOptions();
   renderSocialInputs();
   renderMessages();
   renderPreview();
   renderImages();
+  renderProfilePhotoEditor();
   updateGenerateLabel();
   setStatus("Le contenu local est effacé. Vous pouvez recommencer quand vous voulez.");
 }
@@ -3570,6 +3772,7 @@ function persist() {
     extra: state.extra,
     speak: state.speak,
     aiEnabled: state.aiEnabled,
+    profilePhotoSettings: state.profilePhotoSettings,
     pageStyle: state.pageStyle,
     motionStyle: state.motionStyle,
     endpoint: $("#llmEndpoint").value.trim()
@@ -3595,6 +3798,7 @@ function loadState() {
     state.messages = saved.messages || [];
     state.draft = saved.draft || null;
     state.images = saved.images || []; // ancien format : images encore dans localStorage
+    state.profilePhotoSettings = normalizeProfilePhotoSettings(saved.profilePhotoSettings);
     state.audience = saved.audience || [];
     state.works = saved.works || [];
     state.socialLinks = normalizeSocialLinks(saved.socialLinks || saved.draft?.socialLinks);
@@ -3627,9 +3831,7 @@ function loadState() {
     $("#layoutStyle").value = state.layout;
     $("#llmEndpoint").value = saved.endpoint || "";
     updateAiToggle();
-    $$(".audience-tag").forEach((checkbox) => {
-      checkbox.checked = state.audience.includes(checkbox.value);
-    });
+    // Les étiquettes de public sont (re)rendues par renderAudienceOptions selon le métier.
   } catch {
     localStorage.removeItem(STORAGE_KEY);
   }
@@ -3637,12 +3839,14 @@ function loadState() {
 
 async function loadImages() {
   try {
-    const images = await idbGet(IMAGES_KEY);
+    const [images, profilePhoto] = await Promise.all([idbGet(IMAGES_KEY), idbGet(PROFILE_PHOTO_KEY)]);
     if (Array.isArray(images) && images.length) {
       state.images = images;
-      renderImages();
-      renderPreview();
     }
+    if (profilePhoto && typeof profilePhoto.dataUrl === "string") state.profilePhoto = profilePhoto;
+    renderImages();
+    renderProfilePhotoEditor();
+    if ((Array.isArray(images) && images.length) || state.profilePhoto) renderPreview();
   } catch {
     // IndexedDB indisponible : on garde les éventuelles images du format hérité.
   }

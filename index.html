@@ -17,7 +17,7 @@
 
     <title>Mon Portail Artiste - creer son portail avec l'aide de l'IA</title>
     <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
-    <link rel="stylesheet" href="styles.css?v=20260629-3">
+    <link rel="stylesheet" href="styles.css?v=20260629-4">
   </head>
   <body>
     <a class="skip-link" href="#main" data-i18n="skip">Aller au contenu principal</a>
@@ -107,6 +107,61 @@
                 <label class="speak-toggle"><input type="checkbox" id="speakToggle"> <span data-i18n="guided.speak">Lire les questions à voix haute</span></label>
               </div>
               <p class="cv-privacy" data-i18n="cv.privacy">La photo est lue localement dans votre navigateur. Seul le texte reconnu peut être envoyé à Mistral lorsque l'IA est activée.</p>
+
+              <section class="profile-photo-editor" aria-labelledby="profile-photo-title">
+                <div class="profile-photo-head">
+                  <div>
+                    <h4 id="profile-photo-title" data-i18n="photo.title">Photo personnelle</h4>
+                    <p data-i18n="photo.note">Elle apparaît près de votre nom et reste dans votre navigateur jusqu'à la publication.</p>
+                  </div>
+                  <div class="profile-photo-actions">
+                    <label id="profilePhotoUploadLabel" for="profilePhotoUpload" class="button secondary cv-btn" data-i18n="photo.add">Ajouter ma photo</label>
+                    <input id="profilePhotoUpload" type="file" accept="image/*" hidden>
+                    <button id="removeProfilePhotoBtn" class="button secondary danger" type="button" data-i18n="photo.remove" hidden>Supprimer</button>
+                  </div>
+                </div>
+                <div id="profilePhotoPreview" class="profile-photo-preview" hidden>
+                  <img id="profilePhotoThumb" alt="">
+                </div>
+                <fieldset id="profilePhotoOptions" class="profile-photo-options" hidden>
+                  <legend data-i18n="photo.customize">Personnaliser la photo</legend>
+                  <label for="profilePhotoAlt"><span data-i18n="photo.alt">Description de la photo</span>
+                    <input id="profilePhotoAlt" type="text">
+                  </label>
+                  <label for="profilePhotoSize"><span data-i18n="photo.size">Taille</span>
+                    <input id="profilePhotoSize" type="range" min="45" max="100" step="5" value="85">
+                  </label>
+                  <label for="profilePhotoSide"><span data-i18n="photo.side">Position</span>
+                    <select id="profilePhotoSide">
+                      <option value="right" data-i18n="photo.sideRight">À droite</option>
+                      <option value="left" data-i18n="photo.sideLeft">À gauche</option>
+                    </select>
+                  </label>
+                  <label for="profilePhotoFocus"><span data-i18n="photo.focus">Cadrage</span>
+                    <select id="profilePhotoFocus">
+                      <option value="top" data-i18n="photo.focusTop">Visage vers le haut</option>
+                      <option value="center" data-i18n="photo.focusCenter">Centré</option>
+                      <option value="bottom" data-i18n="photo.focusBottom">Vers le bas</option>
+                    </select>
+                  </label>
+                  <label for="profilePhotoShape"><span data-i18n="photo.shape">Forme</span>
+                    <select id="profilePhotoShape">
+                      <option value="rectangle" data-i18n="photo.shapeRectangle">Rectangle</option>
+                      <option value="rounded" data-i18n="photo.shapeRounded">Angles arrondis</option>
+                      <option value="circle" data-i18n="photo.shapeCircle">Cercle</option>
+                      <option value="arch" data-i18n="photo.shapeArch">Arche</option>
+                    </select>
+                  </label>
+                  <label for="profilePhotoFrame"><span data-i18n="photo.frame">Encadrement</span>
+                    <select id="profilePhotoFrame">
+                      <option value="none" data-i18n="photo.frameNone">Sans cadre</option>
+                      <option value="thin" data-i18n="photo.frameThin">Trait fin</option>
+                      <option value="double" data-i18n="photo.frameDouble">Double cadre</option>
+                      <option value="shadow" data-i18n="photo.frameShadow">Ombre</option>
+                    </select>
+                  </label>
+                </fieldset>
+              </section>
 
               <label for="artistMessage" data-i18n="label.message">Racontez ce que vous voulez mettre en avant</label>
               <textarea id="artistMessage" rows="8" data-i18n-ph="placeholder.message" placeholder="Exemple : Je m'appelle Lina Moreau, je suis artiste visuelle à Marseille. Je travaille la peinture, la photographie et l'installation textile. Mes œuvres parlent de mémoire familiale, d'écologie urbaine et d'objets du quotidien. J'aimerais que cette page s'adresse aux commissaires d'exposition, galeries, résidences et institutions culturelles."></textarea>
@@ -212,12 +267,7 @@
 
               <fieldset class="audience-picker">
                 <legend data-i18n="audience.legend">À qui s'adresse votre page ? (optionnel)</legend>
-                <label class="chip"><input type="checkbox" class="audience-tag" value="les commissaires d'exposition"> <span data-i18n="audience.curators">Commissaires</span></label>
-                <label class="chip"><input type="checkbox" class="audience-tag" value="les galeries"> <span data-i18n="audience.galleries">Galeries</span></label>
-                <label class="chip"><input type="checkbox" class="audience-tag" value="les résidences"> <span data-i18n="audience.residencies">Résidences</span></label>
-                <label class="chip"><input type="checkbox" class="audience-tag" value="les institutions culturelles"> <span data-i18n="audience.institutions">Institutions</span></label>
-                <label class="chip"><input type="checkbox" class="audience-tag" value="les collectionneurs"> <span data-i18n="audience.collectors">Collectionneurs</span></label>
-                <label class="chip"><input type="checkbox" class="audience-tag" value="le grand public"> <span data-i18n="audience.public">Grand public</span></label>
+                <div id="audienceOptions" class="audience-options"></div>
               </fieldset>
 
               <fieldset class="works-input">
@@ -489,6 +539,6 @@
       </div>
     </template>
 
-    <script src="app.js?v=20260629-3"></script>
+    <script src="app.js?v=20260629-4"></script>
   </body>
 </html>
