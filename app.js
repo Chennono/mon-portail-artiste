@@ -124,6 +124,12 @@ const I18N = {
     "extra.technicien.label": "Certifications & licences (optional)", "extra.technicien.q": "Which certifications or licences do you hold? (rigging, electrical, first-aid, driving…)",
     "extra.gestion.label": "Organisations & budgets (optional)", "extra.gestion.q": "Which organisations have you worked with, and which budgets or projects have you managed?",
     "seo.hint": "(meta — not shown publicly)",
+    "share.instantLabel": "Link to share — no hosting needed", "share.instantBtn": "Copy shareable link",
+    "share.instantNote": "This link opens your page directly in the browser. Perfect to send by message or email.",
+    "share.publicLabel": "Public link (if you host the page yourself)",
+    "share.copied": "Link copied! Paste it anywhere — it opens your page directly.",
+    "share.copiedNoImg": "Link copied! Uploaded photos aren't included (link too long); text and style are. For a page with photos, use \"Export HTML\".",
+    "share.needPage": "Create your page first, then copy the shareable link.",
     "studio.intro": "Go at your own pace: tell us about your background, your works, your goals. The assistant prepares a clear draft — generated locally in your browser by default — that you can review, edit and export.",
     "hero.problem": "Today, many performing-arts professionals only exist online through social networks and their algorithms. A personal portal gives you back a stable space of your own to show your work.",
     "trust.unofficial": "Unofficial", "trust.rgaa": "RGAA accessibility", "trust.human": "Human validation", "trust.export": "Exportable",
@@ -208,6 +214,12 @@ const I18N = {
     "extra.technicien.label": "资质与认证(可选)", "extra.technicien.q": "你持有哪些资质或认证?(高空作业、电工、消防、驾照……)",
     "extra.gestion.label": "机构与预算(可选)", "extra.gestion.q": "你与哪些机构合作过,管理过哪些预算或项目?",
     "seo.hint": "(元信息 · 不公开显示)",
+    "share.instantLabel": "可分享链接 — 无需任何托管", "share.instantBtn": "复制可分享链接",
+    "share.instantNote": "此链接直接在浏览器中打开你的页面。适合用消息或邮件发送。",
+    "share.publicLabel": "公开链接(如果你自己托管页面)",
+    "share.copied": "链接已复制!粘贴到任何地方都能直接打开你的页面。",
+    "share.copiedNoImg": "链接已复制!上传的照片未包含(链接过长),但文本和样式已包含。需要带照片的页面请用“导出 HTML”。",
+    "share.needPage": "请先创建页面,再复制可分享链接。",
     "studio.intro": "按自己的节奏来:讲讲你的经历、作品和愿望。助手会准备一份清晰的草稿——默认在你的浏览器本地生成——你可以审阅、修改并导出。",
     "hero.problem": "如今,许多演艺从业者只能通过社交网络及其算法在线“存在”。一个个人门户让你重新拥有一个属于自己的稳定空间来展示作品。",
     "trust.unofficial": "非官方", "trust.rgaa": "RGAA 无障碍", "trust.human": "人工审核", "trust.export": "可导出",
@@ -353,7 +365,14 @@ function captureFrench() {
     "extra.technicien.q": "Quelles habilitations ou certifications avez-vous ? (CACES, habilitation électrique, SSIAP, permis…)",
     "extra.gestion.label": "Structures & budgets (optionnel)",
     "extra.gestion.q": "Avec quelles structures avez-vous travaillé, et quels budgets ou projets avez-vous gérés ?",
-    "seo.hint": "(méta — non affiché publiquement)"
+    "seo.hint": "(méta — non affiché publiquement)",
+    "share.instantLabel": "Lien à partager — aucun hébergement nécessaire",
+    "share.instantBtn": "Copier le lien partageable",
+    "share.instantNote": "Ce lien ouvre votre page directement dans le navigateur. Parfait pour l'envoyer par message ou mail.",
+    "share.publicLabel": "Lien public (si vous hébergez la page vous-même)",
+    "share.copied": "Lien copié ! Collez-le n'importe où : il ouvre votre page directement.",
+    "share.copiedNoImg": "Lien copié ! Les photos importées ne sont pas incluses (lien trop long) ; les textes et le style le sont. Pour une page avec photos, utilisez « Exporter HTML ».",
+    "share.needPage": "Créez d'abord votre page, puis copiez le lien partageable."
   });
 }
 
@@ -623,7 +642,108 @@ function applyPalette(palette) {
   setStatus(palette ? t("palette.applied") : t("palette.cleared"));
 }
 
+function portalPayload(includeImages) {
+  return JSON.stringify({
+    v: 1,
+    draft: state.draft,
+    pageStyle: state.pageStyle,
+    motionStyle: state.motionStyle,
+    layout: state.layout,
+    palette: state.palette,
+    paletteIntensity: state.paletteIntensity,
+    person: state.person,
+    profession: state.profession,
+    fontTitle: state.fontTitle,
+    fontBody: state.fontBody,
+    images: includeImages ? state.images : []
+  });
+}
+
+function bytesToB64Url(bytes) {
+  let bin = "";
+  bytes.forEach((b) => (bin += String.fromCharCode(b)));
+  return btoa(bin).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+}
+
+function b64UrlToBytes(b64) {
+  const norm = b64.replace(/-/g, "+").replace(/_/g, "/");
+  return Uint8Array.from(atob(norm), (c) => c.charCodeAt(0));
+}
+
+async function encodePortal(str) {
+  const input = new TextEncoder().encode(str);
+  if (window.CompressionStream) {
+    const stream = new Blob([input]).stream().pipeThrough(new CompressionStream("gzip"));
+    const buf = await new Response(stream).arrayBuffer();
+    return "g" + bytesToB64Url(new Uint8Array(buf));
+  }
+  return "r" + bytesToB64Url(input);
+}
+
+async function decodePortal(param) {
+  const flag = param[0];
+  const bytes = b64UrlToBytes(param.slice(1));
+  if (flag === "g" && window.DecompressionStream) {
+    const stream = new Blob([bytes]).stream().pipeThrough(new DecompressionStream("gzip"));
+    const buf = await new Response(stream).arrayBuffer();
+    return new TextDecoder().decode(buf);
+  }
+  return new TextDecoder().decode(bytes);
+}
+
+async function copyInstantLink() {
+  if (!state.draft) {
+    setStatus(t("share.needPage"));
+    return;
+  }
+  const base = `${location.origin}${location.pathname}`;
+  let param = await encodePortal(portalPayload(true));
+  let url = `${base}#p=${param}`;
+  let droppedImages = false;
+  if (url.length > 16000 && state.images.length) {
+    param = await encodePortal(portalPayload(false));
+    url = `${base}#p=${param}`;
+    droppedImages = true;
+  }
+  await copyText(url, droppedImages ? t("share.copiedNoImg") : t("share.copied"));
+}
+
+async function enterViewMode(param) {
+  try {
+    const data = JSON.parse(await decodePortal(param));
+    state.draft = data.draft;
+    state.pageStyle = data.pageStyle || "minimal";
+    state.motionStyle = data.motionStyle || "subtle";
+    state.layout = data.layout || "editorial";
+    state.palette = data.palette || null;
+    state.paletteIntensity = typeof data.paletteIntensity === "number" ? data.paletteIntensity : 0.35;
+    state.person = data.person || "third";
+    state.profession = data.profession || "artiste";
+    state.fontTitle = data.fontTitle || "default";
+    state.fontBody = data.fontBody || "default";
+    state.images = Array.isArray(data.images) ? data.images : [];
+    if (!state.draft) throw new Error("draft manquant");
+
+    document.body.classList.add("view-mode");
+    captureFrench();
+    renderPreview();
+    preview.querySelectorAll(".edit-hint, .preview-only, .module-toolbar").forEach((node) => node.remove());
+    preview.querySelectorAll("[contenteditable]").forEach((node) => node.removeAttribute("contenteditable"));
+    drawGeneratedCanvases();
+    document.documentElement.lang = "fr";
+    document.title = `${state.draft.name || "Portail"} — portail`;
+  } catch (error) {
+    // Lien invalide : on bascule sur l'application normale.
+    location.hash = "";
+    location.reload();
+  }
+}
+
 function init() {
+  if (location.hash.startsWith("#p=")) {
+    enterViewMode(location.hash.slice(3));
+    return;
+  }
   loadState();
   bindEvents();
   initVoice();
@@ -726,6 +846,7 @@ function bindEvents() {
   $$("[data-copy-share]").forEach((button) => {
     button.addEventListener("click", () => copyShareText(button.dataset.copyShare));
   });
+  $("#copyInstantLinkBtn").addEventListener("click", copyInstantLink);
   document.addEventListener("selectionchange", trackPreviewSelection);
   document.addEventListener("mousedown", maybeHideTextToolbar);
   document.addEventListener("dragover", updateModuleAutoScroll);

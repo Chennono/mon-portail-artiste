@@ -484,6 +484,56 @@ p {
   color: var(--muted);
 }
 
+.instant-share {
+  margin-bottom: 1rem;
+  padding: 0.85rem 1rem;
+  background: #f3f0ff;
+  border: 1px solid var(--violet, #6a6af4);
+  border-radius: 6px;
+}
+
+.instant-share-label {
+  margin: 0 0 0.5rem;
+  font-weight: 700;
+}
+
+/* Mode lecture : un lien partagé n'affiche que la page, sans l'éditeur. */
+body.view-mode .app-header,
+body.view-mode #uses,
+body.view-mode #compliance,
+body.view-mode #research,
+body.view-mode .studio-heading,
+body.view-mode #stepper,
+body.view-mode .chat-panel,
+body.view-mode .preview-panel .panel-head,
+body.view-mode .preview-panel > .actions,
+body.view-mode .review-note,
+body.view-mode #shareKitPanel,
+body.view-mode #pageEditorToolbar,
+body.view-mode .art-rail,
+body.view-mode .edit-hint,
+body.view-mode .generated-note {
+  display: none !important;
+}
+
+body.view-mode,
+body.view-mode #main,
+body.view-mode .studio,
+body.view-mode .studio-grid,
+body.view-mode .preview-panel {
+  display: block;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  max-width: none;
+}
+
+body.view-mode .portal-preview {
+  margin: 0 auto;
+  box-shadow: none;
+}
+
 .composer-send {
   display: flex;
   align-items: center;
