@@ -231,6 +231,10 @@ const I18N = {
     "audience.legend": "Who is your page for? (optional)",
     "audience.curators": "Curators", "audience.galleries": "Galleries", "audience.residencies": "Residencies", "audience.institutions": "Institutions", "audience.collectors": "Collectors", "audience.public": "General public",
     "audience.programmers": "Programmers", "audience.venuesFestivals": "Venues & festivals", "audience.companies": "Companies & producers", "audience.venues": "Venues & theatres", "audience.festivals": "Festivals", "audience.techDirectors": "Technical directors", "audience.providers": "Technical providers", "audience.training": "Training bodies", "audience.artistsCompanies": "Artists & companies", "audience.funders": "Public funders", "audience.partners": "Professional partners", "audience.networks": "Cultural networks",
+    "img.fit": "Crop", "img.fit.cover": "Fill", "img.fit.contain": "Whole",
+    "img.ratio": "Ratio", "img.ratio.auto": "Auto", "img.ratio.1/1": "Square", "img.ratio.3/4": "Portrait", "img.ratio.4/3": "Landscape", "img.ratio.16/9": "Wide",
+    "img.radius": "Corners", "img.radius.none": "Straight", "img.radius.soft": "Rounded", "img.radius.round": "Circle",
+    "img.filter": "Filter", "img.filter.none": "None", "img.filter.bw": "B&W", "img.filter.sepia": "Sepia", "img.filter.contrast": "Contrast", "img.filter.bright": "Bright",
     "label.upload": "Add a few images of your works, if you wish",
     "btn.sample": "See an example", "btn.advice": "Ask for advice",
     "ai.badge": "Mistral AI", "ai.on": "AI enabled", "ai.off": "AI disabled", "ai.enabledStatus": "AI enabled: your conversation text may be sent to Mistral. Artwork images always remain in your browser.", "ai.disabledStatus": "AI disabled: conversation, CV and page generation now remain local in your browser.",
@@ -332,6 +336,10 @@ const I18N = {
     "audience.legend": "你的页面面向谁?(可选)",
     "audience.curators": "策展人", "audience.galleries": "画廊", "audience.residencies": "驻地项目", "audience.institutions": "机构", "audience.collectors": "收藏家", "audience.public": "大众",
     "audience.programmers": "策划方", "audience.venuesFestivals": "场馆与艺术节", "audience.companies": "剧团与制作方", "audience.venues": "剧场与场馆", "audience.festivals": "艺术节", "audience.techDirectors": "技术总监", "audience.providers": "技术服务商", "audience.training": "培训机构", "audience.artistsCompanies": "艺术家与剧团", "audience.funders": "公共资助方", "audience.partners": "专业合作伙伴", "audience.networks": "文化网络",
+    "img.fit": "裁剪", "img.fit.cover": "填满", "img.fit.contain": "完整",
+    "img.ratio": "比例", "img.ratio.auto": "自动", "img.ratio.1/1": "正方形", "img.ratio.3/4": "竖向", "img.ratio.4/3": "横向", "img.ratio.16/9": "宽幅",
+    "img.radius": "圆角", "img.radius.none": "直角", "img.radius.soft": "圆角", "img.radius.round": "圆形",
+    "img.filter": "滤镜", "img.filter.none": "无", "img.filter.bw": "黑白", "img.filter.sepia": "棕褐", "img.filter.contrast": "对比", "img.filter.bright": "明亮",
     "label.upload": "如果愿意,可添加几张作品图片",
     "btn.sample": "查看示例", "btn.advice": "请求建议",
     "ai.badge": "Mistral AI", "ai.on": "AI 已开启", "ai.off": "AI 已关闭", "ai.enabledStatus": "AI 已开启:对话文字可能发送给 Mistral；作品图片始终保留在浏览器中。", "ai.disabledStatus": "AI 已关闭:对话、简历和页面生成均在浏览器本地完成。",
@@ -398,6 +406,10 @@ function captureFrench() {
   Object.assign(FR, {
     "audience.curators": "Commissaires", "audience.galleries": "Galeries", "audience.residencies": "Résidences", "audience.institutions": "Institutions", "audience.collectors": "Collectionneurs", "audience.public": "Grand public",
     "audience.programmers": "Programmateurs", "audience.venuesFestivals": "Salles & festivals", "audience.companies": "Compagnies & producteurs", "audience.venues": "Salles & théâtres", "audience.festivals": "Festivals", "audience.techDirectors": "Directions techniques", "audience.providers": "Prestataires techniques", "audience.training": "Organismes de formation", "audience.artistsCompanies": "Artistes & compagnies", "audience.funders": "Financeurs publics", "audience.partners": "Partenaires pro", "audience.networks": "Réseaux culturels",
+    "img.fit": "Cadrage", "img.fit.cover": "Remplir", "img.fit.contain": "Entier",
+    "img.ratio": "Format", "img.ratio.auto": "Auto", "img.ratio.1/1": "Carré", "img.ratio.3/4": "Portrait", "img.ratio.4/3": "Paysage", "img.ratio.16/9": "Large",
+    "img.radius": "Coins", "img.radius.none": "Droits", "img.radius.soft": "Arrondis", "img.radius.round": "Cercle",
+    "img.filter": "Filtre", "img.filter.none": "Aucun", "img.filter.bw": "N&B", "img.filter.sepia": "Sépia", "img.filter.contrast": "Contraste", "img.filter.bright": "Lumineux",
     "btn.create": "Créer ma page",
     "btn.regenerate": "Regénérer la page",
     "voice.stop": "Arrêter la dictée",
@@ -1883,6 +1895,7 @@ function normalizeStyle(style) {
 function ensureDraftModules(draft) {
   if (!draft) return [];
   draft.fieldStyles = normalizeStyle(draft.fieldStyles);
+  draft.imageStyles = normalizeStyle(draft.imageStyles);
   draft.socialLinks = normalizeSocialLinks(draft.socialLinks || state.socialLinks);
   if (!draft.sections) {
     draft.sections = { statement: "Présentation", works: "Œuvres sélectionnées", bio: "Repères professionnels" };
@@ -2061,6 +2074,7 @@ function renderPreview() {
       <div class="portal-visual-wrap">
         <div class="portal-visual${state.profilePhoto ? ` profile-portrait photo-shape-${state.profilePhotoSettings.shape} photo-frame-${state.profilePhotoSettings.frame} photo-focus-${state.profilePhotoSettings.focus}` : ""}"${state.profilePhoto ? ` style="--profile-photo-size:${state.profilePhotoSettings.size}%"` : ""}>${renderHeroVisual()}</div>
         ${heroImageControl()}
+        ${imageStyleControls("hero")}
       </div>
     </header>
     <div class="portal-body">
@@ -2076,6 +2090,7 @@ function renderPreview() {
   bindEditableFields();
   bindModuleControls();
   bindWorkEditing();
+  bindImageStyleControls();
   drawGeneratedCanvases();
   updateTypographyControls();
   renderShareKit();
@@ -2612,15 +2627,70 @@ function getMotionLabel(value) {
   }[value] || value;
 }
 
+const IMG_STYLE_FIT = { cover: "cover", contain: "contain" };
+const IMG_STYLE_RATIO = { auto: "", "1/1": "1 / 1", "3/4": "3 / 4", "4/3": "4 / 3", "16/9": "16 / 9" };
+const IMG_STYLE_RADIUS = { none: "0", soft: "12px", round: "50%" };
+const IMG_STYLE_FILTER = { none: "", bw: "grayscale(1)", sepia: "sepia(0.55)", contrast: "contrast(1.15)", bright: "brightness(1.08) saturate(1.1)" };
+const IMG_STYLE_PROPS = { fit: IMG_STYLE_FIT, ratio: IMG_STYLE_RATIO, radius: IMG_STYLE_RADIUS, filter: IMG_STYLE_FILTER };
+
+function imageStyleFor(key, create) {
+  if (!state.draft) return null;
+  state.draft.imageStyles = normalizeStyle(state.draft.imageStyles);
+  if (create && !state.draft.imageStyles[key]) state.draft.imageStyles[key] = {};
+  return state.draft.imageStyles[key] || null;
+}
+
+function imageStyleToString(style) {
+  if (!style) return "";
+  const parts = [];
+  if (style.fit && IMG_STYLE_FIT[style.fit]) parts.push(`object-fit:${IMG_STYLE_FIT[style.fit]}`);
+  if (style.ratio && IMG_STYLE_RATIO[style.ratio]) parts.push(`aspect-ratio:${IMG_STYLE_RATIO[style.ratio]}`);
+  if (style.radius && IMG_STYLE_RADIUS[style.radius]) parts.push(`border-radius:${IMG_STYLE_RADIUS[style.radius]}`);
+  if (style.filter && IMG_STYLE_FILTER[style.filter]) parts.push(`filter:${IMG_STYLE_FILTER[style.filter]}`);
+  return parts.join(";");
+}
+
+function imageStyleAttr(key) {
+  const css = imageStyleToString(imageStyleFor(key));
+  return css ? ` style="${escapeAttribute(css)}"` : "";
+}
+
+function imageStyleControls(key) {
+  const style = imageStyleFor(key) || {};
+  const field = (prop) => {
+    const map = IMG_STYLE_PROPS[prop];
+    const current = style[prop] || Object.keys(map)[0];
+    const options = Object.keys(map)
+      .map((value) => `<option value="${value}"${current === value ? " selected" : ""}>${escapeHtml(t(`img.${prop}.${value}`))}</option>`)
+      .join("");
+    return `<label>${escapeHtml(t(`img.${prop}`))}<select data-img-style="${escapeAttribute(key)}" data-img-prop="${prop}">${options}</select></label>`;
+  };
+  return `<div class="image-style-bar preview-only">${field("fit")}${field("ratio")}${field("radius")}${field("filter")}</div>`;
+}
+
+function updateImageStyle(key, prop, value) {
+  const target = imageStyleFor(key, true);
+  target[prop] = value;
+  renderPreview();
+  persist();
+}
+
+function bindImageStyleControls() {
+  $$("#portalPreview [data-img-style]").forEach((select) => {
+    select.addEventListener("change", () => updateImageStyle(select.dataset.imgStyle, select.dataset.imgProp, select.value));
+  });
+}
+
 function renderHeroVisual() {
+  const styled = imageStyleAttr("hero");
   if (state.profilePhoto) {
-    return `<img src="${state.profilePhoto.dataUrl}" alt="${escapeHtml(state.profilePhoto.alt || t("photo.defaultAlt"))}">`;
+    return `<img src="${state.profilePhoto.dataUrl}" alt="${escapeHtml(state.profilePhoto.alt || t("photo.defaultAlt"))}"${styled}>`;
   }
   const image = resolveHeroImage();
   if (image) {
-    return `<img src="${image.dataUrl}" alt="${escapeHtml(image.alt)}">`;
+    return `<img src="${image.dataUrl}" alt="${escapeHtml(image.alt)}"${styled}>`;
   }
-  return '<canvas data-generated-art="hero" width="640" height="440" aria-label="Visuel abstrait pour l’aperçu"></canvas>';
+  return `<canvas data-generated-art="hero" width="640" height="440" aria-label="Visuel abstrait pour l’aperçu"${styled}></canvas>`;
 }
 
 function resolveHeroImage() {
@@ -2668,9 +2738,10 @@ function renderWorks(works) {
   return works
     .map((work, index) => {
       const image = resolveWorkImage(work, index);
+      const imgStyled = imageStyleAttr(`work:${index}`);
       const visual = image
-        ? `<img src="${image.dataUrl}" alt="${escapeHtml(image.alt)}">`
-        : `<canvas data-generated-art="work-${index}" width="420" height="310" aria-label="Visuel abstrait pour ${escapeHtml(work.title)}"></canvas>`;
+        ? `<img src="${image.dataUrl}" alt="${escapeHtml(image.alt)}"${imgStyled}>`
+        : `<canvas data-generated-art="work-${index}" width="420" height="310" aria-label="Visuel abstrait pour ${escapeHtml(work.title)}"${imgStyled}></canvas>`;
       const imageControl = state.images.length
         ? `<label class="work-image-control">Image
             <select data-work-image="${index}">${imageOptions(workSelectionValue(work, index))}</select></label>`
@@ -2678,6 +2749,7 @@ function renderWorks(works) {
       return `
         <article class="work-card" data-work-index="${index}">
           ${visual}
+          ${imageStyleControls(`work:${index}`)}
           <div>
             <h4 contenteditable="true" data-edit-work="${index}.title" data-style-key="work:${index}:title" data-placeholder="Titre de l'œuvre"${styleAttr(work.styles?.title)}>${escapeHtml(work.title)}</h4>
             <p class="work-meta">
@@ -3667,6 +3739,7 @@ function getSerializablePreviewHtml() {
     const image = document.createElement("img");
     image.src = originalCanvases[index]?.toDataURL("image/png") || "";
     image.alt = canvas.getAttribute("aria-label") || "Image d'œuvre";
+    if (canvas.getAttribute("style")) image.setAttribute("style", canvas.getAttribute("style"));
     canvas.replaceWith(image);
   });
   clone.querySelectorAll("[contenteditable]").forEach((node) => {

@@ -477,6 +477,34 @@ p {
   cursor: pointer;
 }
 
+.image-style-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+  margin-top: 0.5rem;
+}
+
+.image-style-bar label {
+  display: inline-flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--muted);
+}
+
+.image-style-bar select {
+  width: auto;
+  min-height: 30px;
+  padding: 0.2rem 0.35rem;
+  font-size: 0.82rem;
+  text-transform: none;
+  letter-spacing: 0;
+  font-weight: 400;
+}
+
 .cv-privacy {
   margin: -0.2rem 0 0.75rem;
   color: var(--muted);
