@@ -473,6 +473,10 @@ p {
   font-weight: 500;
 }
 
+.cv-btn {
+  cursor: pointer;
+}
+
 .speak-toggle input {
   width: auto;
   margin: 0;

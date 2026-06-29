@@ -178,6 +178,7 @@ const I18N = {
     "publish.btn": "Publish my page", "publish.updateBtn": "Update my published page", "publish.inProgress": "Publishing…", "publish.done": "Your page is online! Its permanent link has been copied.", "publish.updated": "Your page has been updated at the same address. The link has been copied.", "publish.failed": "Publishing failed:", "publish.needPage": "Create your page first, then publish it.", "publish.notConfigured": "The publishing service is not configured yet.", "publish.reviewRequired": "Before publishing, please tick the three verification boxes below.", "publish.ready": "Everything is ready. You can publish your page.", "publish.urlLabel": "Your personal address", "publish.copyBtn": "Copy link", "publish.copied": "Permanent link copied.",
     "publish.unpublishBtn": "Unpublish", "publish.unpublishConfirm": "Permanently remove your page online? The link will stop working.", "publish.unpublishing": "Removing…", "publish.unpublished": "Your online page has been removed.", "publish.unpublishFailed": "Removal failed:", "publish.nothingToUnpublish": "No published page to remove.",
     "publish.turnstileNeeded": "Please tick the anti-bot box before publishing.",
+    "cv.btn": "Import a CV", "cv.prefix": "Here is my CV, help me turn it into a page:", "cv.reading": "Reading the CV…", "cv.imported": "CV imported. Preparing your page from its content…", "cv.empty": "I couldn't read any text (scanned image CV?). Try a text-based PDF/Word, or type your info.", "cv.unsupported": "Unsupported format. Use a PDF, Word (.docx) or text file.", "cv.docOld": "Old .doc files aren't read. Save as .docx or PDF and try again.", "cv.failed": "Reading the CV failed:",
     "cmd.applied": "Done — I applied:", "cmd.bgDark": "dark background", "cmd.bgLight": "light background", "cmd.fontHand": "handwritten font", "cmd.fontSerif": "serif font", "cmd.fontSans": "sans-serif font",
     "studio.intro": "Go at your own pace: tell us about your background, your works, your goals. The Mistral assistant prepares a clear draft that you can review, edit and export.",
     "hero.problem": "Today, many performing-arts professionals only exist online through social networks and their algorithms. A personal portal gives you back a stable space of your own to show your work.",
@@ -276,6 +277,7 @@ const I18N = {
     "publish.btn": "发布我的页面", "publish.updateBtn": "更新已发布页面", "publish.inProgress": "正在发布……", "publish.done": "个人页面已上线，固定网址已复制。", "publish.updated": "页面已在同一网址更新，链接已复制。", "publish.failed": "发布失败:", "publish.needPage": "请先创建个人页面，再进行发布。", "publish.notConfigured": "发布服务尚未配置。", "publish.reviewRequired": "发布前，请先勾选下方三个确认选项。", "publish.ready": "准备完成，现在可以发布页面。", "publish.urlLabel": "你的个人网址", "publish.copyBtn": "复制链接", "publish.copied": "固定网址已复制。",
     "publish.unpublishBtn": "取消发布", "publish.unpublishConfirm": "确定要永久下线你的页面吗?该链接将失效。", "publish.unpublishing": "正在删除……", "publish.unpublished": "你的在线页面已下线。", "publish.unpublishFailed": "删除失败:", "publish.nothingToUnpublish": "没有可下线的已发布页面。",
     "publish.turnstileNeeded": "发布前请先勾选人机验证。",
+    "cv.btn": "导入简历", "cv.prefix": "这是我的简历,帮我做成一个页面:", "cv.reading": "正在读取简历……", "cv.imported": "简历已导入。正在根据内容生成你的页面……", "cv.empty": "没能读取到文字(可能是扫描图片简历?)。请用文字版 PDF/Word,或直接输入信息。", "cv.unsupported": "不支持的格式。请使用 PDF、Word(.docx)或文本文件。", "cv.docOld": "旧版 .doc 文件无法读取。请另存为 .docx 或 PDF 后重试。", "cv.failed": "读取简历失败:",
     "cmd.applied": "已完成,我应用了:", "cmd.bgDark": "深色背景", "cmd.bgLight": "浅色背景", "cmd.fontHand": "手写字体", "cmd.fontSerif": "衬线字体", "cmd.fontSans": "无衬线字体",
     "studio.intro": "按自己的节奏来:讲讲你的经历、作品和愿望。Mistral 助手会准备一份清晰的草稿,你可以审阅、修改并导出。",
     "hero.problem": "如今,许多演艺从业者只能通过社交网络及其算法在线“存在”。一个个人门户让你重新拥有一个属于自己的稳定空间来展示作品。",
@@ -455,6 +457,14 @@ function captureFrench() {
     "publish.unpublishFailed": "La suppression a échoué :",
     "publish.nothingToUnpublish": "Aucune page publiée à retirer.",
     "publish.turnstileNeeded": "Cochez la case anti-robot avant de publier.",
+    "cv.btn": "Importer un CV",
+    "cv.prefix": "Voici mon CV, aide-moi à en faire une page :",
+    "cv.reading": "Lecture du CV…",
+    "cv.imported": "CV importé. Je prépare votre page à partir de son contenu…",
+    "cv.empty": "Je n'ai pas réussi à lire de texte (CV scanné en image ?). Essayez un PDF/Word texte, ou saisissez vos infos.",
+    "cv.unsupported": "Format non pris en charge. Utilisez un PDF, un Word (.docx) ou un fichier texte.",
+    "cv.docOld": "Les anciens fichiers .doc ne sont pas lus. Enregistrez en .docx ou en PDF, puis réessayez.",
+    "cv.failed": "La lecture du CV a échoué :",
     "cmd.applied": "C'est fait, j'ai appliqué :",
     "cmd.bgDark": "fond sombre",
     "cmd.bgLight": "fond clair",
@@ -876,6 +886,7 @@ function bindEvents() {
   $("#clearBtn").addEventListener("click", clearLocalData);
   $("#voiceBtn").addEventListener("click", toggleVoiceInput);
   $("#imageUpload").addEventListener("change", handleImages);
+  $("#cvUpload").addEventListener("change", handleCvUpload);
   $("#pageStyle").addEventListener("change", updateDesignChoice);
   $("#motionStyle").addEventListener("change", updateDesignChoice);
   $("#personStyle").addEventListener("change", updatePerson);
@@ -2904,6 +2915,95 @@ function downloadShareKit() {
   ].join("\n");
   download(`${slugify(state.draft.name)}-kit-social.txt`, content, "text/plain");
   setStatus("Kit social téléchargé.");
+}
+
+let pdfJsLoader;
+function ensurePdfJs() {
+  if (window.pdfjsLib) return Promise.resolve(window.pdfjsLib);
+  if (pdfJsLoader) return pdfJsLoader;
+  pdfJsLoader = new Promise((resolve, reject) => {
+    const script = document.createElement("script");
+    script.src = "https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/legacy/build/pdf.min.js";
+    script.onload = () => {
+      window.pdfjsLib.GlobalWorkerOptions.workerSrc = "https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/legacy/build/pdf.worker.min.js";
+      resolve(window.pdfjsLib);
+    };
+    script.onerror = () => reject(new Error("PDF.js indisponible"));
+    document.head.append(script);
+  });
+  return pdfJsLoader;
+}
+
+let mammothLoader;
+function ensureMammoth() {
+  if (window.mammoth) return Promise.resolve(window.mammoth);
+  if (mammothLoader) return mammothLoader;
+  mammothLoader = new Promise((resolve, reject) => {
+    const script = document.createElement("script");
+    script.src = "https://cdn.jsdelivr.net/npm/mammoth@1.8.0/mammoth.browser.min.js";
+    script.onload = () => resolve(window.mammoth);
+    script.onerror = () => reject(new Error("Lecteur Word indisponible"));
+    document.head.append(script);
+  });
+  return mammothLoader;
+}
+
+async function extractPdfText(file) {
+  const lib = await ensurePdfJs();
+  const data = await file.arrayBuffer();
+  const pdf = await lib.getDocument({ data }).promise;
+  const pages = Math.min(pdf.numPages, 10);
+  let text = "";
+  for (let i = 1; i <= pages; i += 1) {
+    const page = await pdf.getPage(i);
+    const content = await page.getTextContent();
+    text += `${content.items.map((item) => item.str).join(" ")}\n`;
+  }
+  return text;
+}
+
+async function extractDocxText(file) {
+  const lib = await ensureMammoth();
+  const result = await lib.extractRawText({ arrayBuffer: await file.arrayBuffer() });
+  return result.value || "";
+}
+
+async function handleCvUpload(event) {
+  const file = event.target.files && event.target.files[0];
+  event.target.value = "";
+  if (!file) return;
+  const name = file.name.toLowerCase();
+  setStatus(t("cv.reading"));
+  try {
+    let text = "";
+    if (name.endsWith(".pdf") || file.type === "application/pdf") {
+      text = await extractPdfText(file);
+    } else if (name.endsWith(".docx")) {
+      text = await extractDocxText(file);
+    } else if (name.endsWith(".txt") || file.type === "text/plain") {
+      text = await file.text();
+    } else if (name.endsWith(".doc")) {
+      setStatus(t("cv.docOld"));
+      return;
+    } else {
+      setStatus(t("cv.unsupported"));
+      return;
+    }
+
+    text = clean(text).replace(/[ \t]{3,}/g, " ").replace(/\n{3,}/g, "\n\n").slice(0, 6000);
+    if (text.length < 30) {
+      setStatus(t("cv.empty"));
+      return;
+    }
+
+    state.messages.push({ role: "user", content: `${t("cv.prefix")}\n${text}` });
+    renderMessages();
+    persist();
+    setStatus(t("cv.imported"));
+    await generatePortal();
+  } catch (error) {
+    setStatus(`${t("cv.failed")} ${error.message || error}`);
+  }
 }
 
 async function handleImages(event) {
