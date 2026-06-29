@@ -54,11 +54,35 @@ curl -X POST http://localhost:8787/publish -H "Content-Type: application/json" \
   -d '{"html":"<!doctype html><h1>Test</h1>"}'
 ```
 
+## Activer Turnstile (anti-robot, optionnel mais recommandé)
+
+Le code gère déjà Turnstile : **inactif tant qu'aucune clé n'est configurée**. Pour l'activer :
+
+1. Cloudflare → **Turnstile** → *Add widget* (domaine = celui du site, ex. `chennono.github.io`).
+   Vous obtenez une **sitekey** (publique) et un **secret** (privé).
+2. Côté Worker, enregistrez le secret :
+   ```bash
+   npx wrangler secret put TURNSTILE_SECRET
+   # collez le secret quand demandé, puis :
+   npx wrangler deploy
+   ```
+3. Côté app, dans `../app.js`, renseignez la sitekey :
+   ```js
+   const TURNSTILE_SITEKEY = "0x4AAAAAAA....";
+   ```
+   Re-déployez le site. Une case anti-robot apparaît alors avant « Publier ».
+
+Tant que `TURNSTILE_SECRET` n'est pas défini, le Worker n'exige pas de jeton (publication ouverte).
+`/ai` reste protégé par une **limite de débit** (40 requêtes/heure/IP) — les jetons Turnstile,
+à usage unique, ne conviennent pas à des appels de conversation répétés.
+
+## Endpoints
+`POST /publish` · `POST /unpublish` (jeton d'édition requis) · `POST /ai` · `GET /p/:id`
+
 ## Notes / limites
 - **Coût** : le free tier Cloudflare (Workers + KV) suffit largement pour un prototype.
-- **Abus** : l'endpoint `/publish` est ouvert. Pour un usage public réel, ajoutez une
-  protection (Cloudflare Turnstile, limite de débit, ou un jeton). À ne pas négliger
-  car le service héberge du HTML arbitraire.
+- **Abus** : sans Turnstile, `/publish` est ouvert et héberge du HTML arbitraire — activez-le
+  avant toute ouverture publique large.
 - **RGPD** : les pages publiées sont stockées sur le serveur sans expiration automatique
   (contrairement au reste de l'app, 100 % local). Un mécanisme de suppression explicite
   devra être ajouté avant un usage en production.

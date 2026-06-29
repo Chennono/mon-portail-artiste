@@ -18,36 +18,6 @@ const MAX_BYTES = 5_000_000; // 5 Mo (les images sont intégrées en base64)
 const MAX_AI_BYTES = 80_000;
 const MISTRAL_MODEL = "@cf/mistralai/mistral-small-3.1-24b-instruct";
 
-const PORTAL_SCHEMA = {
-  type: "object",
-  properties: {
-    name: { type: "string" },
-    location: { type: "string" },
-    tagline: { type: "string" },
-    statement: { type: "string" },
-    bio: { type: "string" },
-    goals: { type: "string" },
-    contact: { type: "string" },
-    seo: { type: "string" },
-    keywords: { type: "array", items: { type: "string" } },
-    works: {
-      type: "array",
-      items: {
-        type: "object",
-        properties: {
-          title: { type: "string" },
-          year: { type: "string" },
-          medium: { type: "string" },
-          description: { type: "string" }
-        },
-        required: ["title", "year", "medium", "description"]
-      }
-    },
-    links: { type: "array", items: { type: "string" } },
-    complianceNote: { type: "string" }
-  },
-  required: ["name", "location", "tagline", "statement", "bio", "goals", "contact", "seo", "keywords", "works", "links", "complianceNote"]
-};
 
 export default {
   async fetch(request, env) {
@@ -88,6 +58,9 @@ export default {
       } catch {
         return json({ error: "Corps JSON invalide." }, 400);
       }
+      if (!(await verifyTurnstile(body.turnstileToken, env.TURNSTILE_SECRET, request.headers.get("CF-Connecting-IP")))) {
+        return json({ error: "Vérification anti-robot échouée. Réessayez." }, 403);
+      }
       const html = typeof body.html === "string" ? body.html : "";
       if (html.length < 50) return json({ error: "HTML manquant." }, 400);
       if (html.length > MAX_BYTES) return json({ error: "Page trop lourde (max 5 Mo)." }, 413);
@@ -124,11 +97,32 @@ export default {
       return json({ url: portalUrl(url.origin, id), id, editToken: newEditToken, permanent: true, updated: false }, 201);
     }
 
+    // Dépublier (supprimer) une page — nécessite le jeton d'édition
+    if (request.method === "POST" && url.pathname === "/unpublish") {
+      let body;
+      try {
+        body = await request.json();
+      } catch {
+        return json({ error: "Corps JSON invalide." }, 400);
+      }
+      const targetId = sanitizePortalId(body.id);
+      const editToken = typeof body.editToken === "string" ? body.editToken : "";
+      if (!targetId || !editToken) return json({ error: "Identifiant ou jeton manquant." }, 400);
+
+      const existing = parseRecord(await env.PORTAILS.get(targetId));
+      if (!existing) return json({ deleted: true, id: targetId });
+      if (existing.version !== 2 || !(await tokenMatches(editToken, existing.tokenHash))) {
+        return json({ error: "Autorisation de suppression refusée." }, 403);
+      }
+      await env.PORTAILS.delete(targetId);
+      return json({ deleted: true, id: targetId });
+    }
+
     return json({
       service: "Mon Portail Artiste — publication et IA",
       model: MISTRAL_MODEL,
       permanentUrls: true,
-      endpoints: ["POST /ai", "POST /publish", "GET /p/:id"]
+      endpoints: ["POST /ai", "POST /publish", "POST /unpublish", "GET /p/:id"]
     });
   }
 };
@@ -165,7 +159,6 @@ async function handleAi(request, env) {
     temperature: mode === "generate" ? 0.2 : 0.35,
     repetition_penalty: 1.08
   };
-  if (mode === "generate") options.guided_json = PORTAL_SCHEMA;
 
   try {
     const result = await env.AI.run(MISTRAL_MODEL, options);
@@ -182,6 +175,24 @@ async function handleAi(request, env) {
   } catch (error) {
     console.error(JSON.stringify({ event: "mistral_error", mode, message: error instanceof Error ? error.message : String(error) }));
     return json({ error: "Mistral est momentanément indisponible. Le brouillon local reste accessible." }, 502);
+  }
+}
+
+// Vérifie un jeton Turnstile. Si aucun secret n'est configuré, la protection est
+// désactivée (comportement inchangé). Sinon, un jeton valide est exigé.
+async function verifyTurnstile(token, secret, ip) {
+  if (!secret) return true;
+  if (typeof token !== "string" || !token) return false;
+  const form = new FormData();
+  form.append("secret", secret);
+  form.append("response", token);
+  if (ip) form.append("remoteip", ip);
+  try {
+    const result = await fetch("https://challenges.cloudflare.com/turnstile/v0/siteverify", { method: "POST", body: form });
+    const data = await result.json();
+    return data.success === true;
+  } catch {
+    return false;
   }
 }
 
@@ -242,7 +253,10 @@ function chatSystemPrompt() {
 }
 
 function generationSystemPrompt() {
-  return `Tu es l'assistant éditorial Mistral de Mon Portail Artiste. À partir des seuls faits donnés par la personne, prépare le contenu de son portail professionnel. Écris dans la langue principalement utilisée dans la conversation, avec un ton accueillant, précis et naturel. N'invente jamais de parcours, prix, exposition, compétence, œuvre, date, lieu, lien ou contact. Si une information manque, laisse une chaîne vide ou un tableau vide. Le statement explique la démarche; la bio reste factuelle; la tagline est courte; le SEO est une méta-description et ne doit pas devenir une section visible. Les œuvres doivent uniquement reprendre celles citées. Le complianceNote doit rappeler que le contenu est assisté par IA, modifiable et à relire par l'artiste. Retourne uniquement l'objet JSON demandé.`;
+  return `Tu es l'assistant éditorial Mistral de Mon Portail Artiste. À partir des seuls faits donnés par la personne, prépare le contenu de son portail professionnel. Écris dans la langue principalement utilisée dans la conversation, avec un ton accueillant, précis et naturel. Respecte aussi toute consigne de ton donnée par la personne (par ex. plus poétique, plus sobre). N'invente jamais de parcours, prix, exposition, compétence, œuvre, date, lieu, lien ou contact. Si une information manque, laisse une chaîne vide ou un tableau vide. Le statement explique la démarche; la bio reste factuelle; la tagline est courte; le SEO est une méta-description. Les œuvres doivent uniquement reprendre celles citées. Le complianceNote rappelle que le contenu est assisté par IA, modifiable et à relire.
+
+Retourne UNIQUEMENT un objet JSON valide (aucun texte avant ou après, sans bloc de code), avec EXACTEMENT ces clés :
+{"name":"","location":"","tagline":"","statement":"","bio":"","goals":"","contact":"","seo":"","keywords":[],"works":[{"title":"","year":"","medium":"","description":""}],"links":[],"complianceNote":""}`;
 }
 
 function parseRecord(stored) {

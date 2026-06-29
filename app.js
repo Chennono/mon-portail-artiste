@@ -4,6 +4,10 @@ const STORAGE_KEY = "mon-portail-artiste-chat-fr-v2";
 // Laisser vide désactive le bouton « Publier » (le reste de l'app fonctionne).
 const PUBLISH_ENDPOINT = "https://mon-portail-artiste-publish.artiste-personnalise.workers.dev";
 const AI_ENDPOINT = `${PUBLISH_ENDPOINT.replace(/\/$/, "")}/ai`;
+// Clé de site Turnstile (anti-robot). Vide = protection désactivée.
+// Créez un widget dans Cloudflare → Turnstile, collez la sitekey ici, et le secret
+// côté Worker via `wrangler secret put TURNSTILE_SECRET`.
+const TURNSTILE_SITEKEY = "";
 const IDB_NAME = "mon-portail-artiste-db";
 const IDB_STORE = "kv";
 const IMAGES_KEY = "images";
@@ -55,6 +59,7 @@ const state = {
   shareUrl: "",
   publishId: "",
   publishToken: "",
+  turnstileToken: "",
   pageStyle: "minimal",
   motionStyle: "subtle",
   listening: false,
@@ -171,6 +176,9 @@ const I18N = {
     "share.publishNote": "Publish your page with its images. Your personal address stays the same for future updates.",
     "share.retentionNote": "This address does not change and the page no longer expires automatically.",
     "publish.btn": "Publish my page", "publish.updateBtn": "Update my published page", "publish.inProgress": "Publishing…", "publish.done": "Your page is online! Its permanent link has been copied.", "publish.updated": "Your page has been updated at the same address. The link has been copied.", "publish.failed": "Publishing failed:", "publish.needPage": "Create your page first, then publish it.", "publish.notConfigured": "The publishing service is not configured yet.", "publish.reviewRequired": "Before publishing, please tick the three verification boxes below.", "publish.ready": "Everything is ready. You can publish your page.", "publish.urlLabel": "Your personal address", "publish.copyBtn": "Copy link", "publish.copied": "Permanent link copied.",
+    "publish.unpublishBtn": "Unpublish", "publish.unpublishConfirm": "Permanently remove your page online? The link will stop working.", "publish.unpublishing": "Removing…", "publish.unpublished": "Your online page has been removed.", "publish.unpublishFailed": "Removal failed:", "publish.nothingToUnpublish": "No published page to remove.",
+    "publish.turnstileNeeded": "Please tick the anti-bot box before publishing.",
+    "cmd.applied": "Done — I applied:", "cmd.bgDark": "dark background", "cmd.bgLight": "light background", "cmd.fontHand": "handwritten font", "cmd.fontSerif": "serif font", "cmd.fontSans": "sans-serif font",
     "studio.intro": "Go at your own pace: tell us about your background, your works, your goals. The Mistral assistant prepares a clear draft that you can review, edit and export.",
     "hero.problem": "Today, many performing-arts professionals only exist online through social networks and their algorithms. A personal portal gives you back a stable space of your own to show your work.",
     "trust.unofficial": "Unofficial", "trust.rgaa": "RGAA accessibility", "trust.human": "Human validation", "trust.export": "Exportable",
@@ -266,6 +274,9 @@ const I18N = {
     "share.publishNote": "发布包含图片的个人页面。以后更新页面时，你的个人网址不会改变。",
     "share.retentionNote": "这个网址不会改变，页面也不再自动过期。",
     "publish.btn": "发布我的页面", "publish.updateBtn": "更新已发布页面", "publish.inProgress": "正在发布……", "publish.done": "个人页面已上线，固定网址已复制。", "publish.updated": "页面已在同一网址更新，链接已复制。", "publish.failed": "发布失败:", "publish.needPage": "请先创建个人页面，再进行发布。", "publish.notConfigured": "发布服务尚未配置。", "publish.reviewRequired": "发布前，请先勾选下方三个确认选项。", "publish.ready": "准备完成，现在可以发布页面。", "publish.urlLabel": "你的个人网址", "publish.copyBtn": "复制链接", "publish.copied": "固定网址已复制。",
+    "publish.unpublishBtn": "取消发布", "publish.unpublishConfirm": "确定要永久下线你的页面吗?该链接将失效。", "publish.unpublishing": "正在删除……", "publish.unpublished": "你的在线页面已下线。", "publish.unpublishFailed": "删除失败:", "publish.nothingToUnpublish": "没有可下线的已发布页面。",
+    "publish.turnstileNeeded": "发布前请先勾选人机验证。",
+    "cmd.applied": "已完成,我应用了:", "cmd.bgDark": "深色背景", "cmd.bgLight": "浅色背景", "cmd.fontHand": "手写字体", "cmd.fontSerif": "衬线字体", "cmd.fontSans": "无衬线字体",
     "studio.intro": "按自己的节奏来:讲讲你的经历、作品和愿望。Mistral 助手会准备一份清晰的草稿,你可以审阅、修改并导出。",
     "hero.problem": "如今,许多演艺从业者只能通过社交网络及其算法在线“存在”。一个个人门户让你重新拥有一个属于自己的稳定空间来展示作品。",
     "trust.unofficial": "非官方", "trust.rgaa": "RGAA 无障碍", "trust.human": "人工审核", "trust.export": "可导出",
@@ -436,7 +447,20 @@ function captureFrench() {
     "publish.ready": "Tout est prêt. Vous pouvez publier votre page.",
     "publish.urlLabel": "Votre adresse personnelle",
     "publish.copyBtn": "Copier le lien",
-    "publish.copied": "Lien permanent copié."
+    "publish.copied": "Lien permanent copié.",
+    "publish.unpublishBtn": "Dépublier",
+    "publish.unpublishConfirm": "Retirer définitivement votre page en ligne ? Le lien ne fonctionnera plus.",
+    "publish.unpublishing": "Suppression…",
+    "publish.unpublished": "Votre page en ligne a été retirée.",
+    "publish.unpublishFailed": "La suppression a échoué :",
+    "publish.nothingToUnpublish": "Aucune page publiée à retirer.",
+    "publish.turnstileNeeded": "Cochez la case anti-robot avant de publier.",
+    "cmd.applied": "C'est fait, j'ai appliqué :",
+    "cmd.bgDark": "fond sombre",
+    "cmd.bgLight": "fond clair",
+    "cmd.fontHand": "police manuscrite",
+    "cmd.fontSerif": "police à empattements (serif)",
+    "cmd.fontSans": "police sans empattements"
   });
 }
 
@@ -813,6 +837,7 @@ function init() {
   loadState();
   bindEvents();
   initVoice();
+  initTurnstile();
   captureFrench();
   renderMessages();
   renderPreview();
@@ -902,6 +927,7 @@ function bindEvents() {
   $("#llmEndpoint").addEventListener("input", persist);
   $("#publishBtn").addEventListener("click", publishPage);
   $("#copyPublishedUrlBtn").addEventListener("click", () => copyText(state.shareUrl, t("publish.copied")));
+  $("#unpublishBtn").addEventListener("click", unpublishPage);
   if (!PUBLISH_ENDPOINT) $("#publishBtn").hidden = true;
   $$(".review-check").forEach((check) => {
     check.addEventListener("change", () => {
@@ -918,6 +944,49 @@ function bindEvents() {
   document.addEventListener("drop", stopModuleAutoScroll);
   window.addEventListener("scroll", positionFloatingTextToolbar, { passive: true });
   window.addEventListener("resize", positionFloatingTextToolbar);
+}
+
+function initTurnstile() {
+  if (!TURNSTILE_SITEKEY) return;
+  const container = $("#turnstileWidget");
+  if (!container) return;
+  container.hidden = false;
+  const render = () => {
+    if (!window.turnstile) return;
+    window.turnstile.render("#turnstileWidget", {
+      sitekey: TURNSTILE_SITEKEY,
+      callback: (token) => {
+        state.turnstileToken = token;
+      },
+      "expired-callback": () => {
+        state.turnstileToken = "";
+      },
+      "error-callback": () => {
+        state.turnstileToken = "";
+      }
+    });
+  };
+  if (window.turnstile) {
+    render();
+    return;
+  }
+  const script = document.createElement("script");
+  script.src = "https://challenges.cloudflare.com/turnstile/v0/api.js";
+  script.async = true;
+  script.defer = true;
+  script.onload = render;
+  document.head.append(script);
+}
+
+function resetTurnstile() {
+  state.turnstileToken = "";
+  if (TURNSTILE_SITEKEY && window.turnstile) {
+    try {
+      window.turnstile.reset("#turnstileWidget");
+    } catch {
+      // widget non encore rendu : rien à faire.
+    }
+  }
 }
 
 function initVoice() {
@@ -1031,6 +1100,137 @@ function speak(text) {
   }
 }
 
+function setPalettePreset(key) {
+  const preset = PALETTE_PRESETS.find((item) => item.key === key);
+  if (!preset) return;
+  const palette = buildPalette(preset.bg, preset.accent);
+  palette.preset = key;
+  applyPalette(palette);
+}
+
+function setLayoutValue(value) {
+  state.layout = value;
+  const select = $("#layoutStyle");
+  if (select) select.value = value;
+  applyPreviewDesign();
+  persist();
+}
+
+function setPageStyleValue(value) {
+  state.pageStyle = value;
+  const select = $("#pageStyle");
+  if (select) select.value = value;
+  applyPreviewDesign();
+  renderStyleGallery();
+  persist();
+}
+
+function setFontValue(id, both) {
+  state.fontTitle = id;
+  if (both) state.fontBody = id;
+  const tf = $("#titleFont");
+  const bf = $("#bodyFont");
+  if (tf) tf.value = state.fontTitle;
+  if (bf) bf.value = state.fontBody;
+  applyPreviewDesign();
+  persist();
+}
+
+function setPersonValue(value) {
+  state.person = value;
+  const select = $("#personStyle");
+  if (select) select.value = value;
+  if (state.draft) {
+    state.draft = buildLocalDraft();
+    renderPreview();
+  }
+  persist();
+}
+
+// Reconnaît des demandes de mise en forme dans le chat (FR/EN/中文) et les applique.
+function applyDesignCommands(text) {
+  const s = ` ${text.toLowerCase()} `;
+  const applied = [];
+  const aboutBg = /(fond|arri[èe]re[- ]?plan|background|背景|底色)/.test(s);
+
+  // Fond sombre / clair
+  if (/(sombre|noir|dark|深色|暗色|黑色|黑底)/.test(s) && (aboutBg || /(sombre|dark|暗|黑)/.test(s))) {
+    setPalettePreset("nuit");
+    applied.push(t("cmd.bgDark"));
+  } else if (aboutBg && /(clair|blanc|light|white|浅色|明亮|白底|白色)/.test(s)) {
+    applyPalette(null);
+    applied.push(t("cmd.bgLight"));
+  } else {
+    // Couleur dominante / palette
+    const palettes = [
+      [/(bleu|blue|蓝)/, "ocean"],
+      [/(vert|green|绿)/, "foret"],
+      [/(rose|pink|粉)/, "rose"],
+      [/(sable|beige|brun|brown|terre|米|棕)/, "sable"],
+      [/(encre|marine|navy|墨|藏青)/, "encre"]
+    ];
+    for (const [re, preset] of palettes) {
+      if (re.test(s) && (aboutBg || /(couleur|palette|teinte|accent|color|colour|颜色|配色|色调)/.test(s))) {
+        setPalettePreset(preset);
+        applied.push(t(`palette.${preset}`));
+        break;
+      }
+    }
+  }
+
+  // Mise en page
+  const layouts = [
+    [/(magazine|[ée]ditorial|revue|杂志|编辑)/, "editorial"],
+    [/(affiche|poster|海报|大标题)/, "affiche"],
+    [/(mosa[ïi]que|masonry|瀑布)/, "mosaique"],
+    [/(d[ée]filement|horizontal|滚动|轮播)/, "defilement"],
+    [/(centr[ée]|center|居中)/, "centre"],
+    [/(colonnes?|columns?|分栏)/, "standard"]
+  ];
+  for (const [re, value] of layouts) {
+    if (re.test(s)) {
+      setLayoutValue(value);
+      applied.push(t(`layout.${value}`));
+      break;
+    }
+  }
+
+  // Style visuel (skin)
+  if (/(galerie|gallery|画廊)/.test(s)) {
+    setPageStyleValue("gallery");
+    applied.push(t("style.gallery"));
+  } else if (/(immersif|沉浸)/.test(s)) {
+    setPageStyleValue("dark");
+    applied.push(t("style.dark"));
+  } else if (/(sobre|minimal|简洁)/.test(s)) {
+    setPageStyleValue("minimal");
+    applied.push(t("style.minimal"));
+  }
+
+  // Polices
+  if (/(manuscrit|hand[- ]?writ|手写|手寫)/.test(s)) {
+    setFontValue("caveat", false);
+    applied.push(t("cmd.fontHand"));
+  } else if (/(serif|衬线|襯線)/.test(s)) {
+    setFontValue("playfair", true);
+    applied.push(t("cmd.fontSerif"));
+  } else if (/(sans[- ]?serif|无衬线|bâton|baton)/.test(s)) {
+    setFontValue("space", true);
+    applied.push(t("cmd.fontSans"));
+  }
+
+  // Voix / personne
+  if (/(premi[èe]re personne|first person|\bje\b.*\bplut[ôo]t\b|第一人称|用我)/.test(s)) {
+    setPersonValue("first");
+    applied.push(t("person.first"));
+  } else if (/(troisi[èe]me personne|third person|第三人称|用名字)/.test(s)) {
+    setPersonValue("third");
+    applied.push(t("person.third"));
+  }
+
+  return applied;
+}
+
 async function sendMessage() {
   const text = messageInput.value.trim();
   if (!text) {
@@ -1045,6 +1245,15 @@ async function sendMessage() {
 
   if (state.guided.active) {
     advanceGuided(text);
+    return;
+  }
+
+  const applied = applyDesignCommands(text);
+  if (applied.length) {
+    state.messages.push({ role: "assistant", content: `${t("cmd.applied")} ${applied.join(", ")}.` });
+    renderMessages();
+    persist();
+    setStatus(`${t("cmd.applied")} ${applied.join(", ")}.`);
     return;
   }
 
@@ -2927,6 +3136,11 @@ async function publishPage() {
     return;
   }
   if (!publishingReviewReady()) return;
+  if (TURNSTILE_SITEKEY && !state.turnstileToken) {
+    setPublishStatus(t("publish.turnstileNeeded"), "error");
+    setStatus(t("publish.turnstileNeeded"));
+    return;
+  }
   const button = $("#publishBtn");
   const wasPublished = Boolean(state.publishId && state.publishToken);
   let published = false;
@@ -2941,7 +3155,8 @@ async function publishPage() {
         html,
         slug: personalizedPortalSlug(state.draft.name),
         id: state.publishId || undefined,
-        editToken: state.publishToken || undefined
+        editToken: state.publishToken || undefined,
+        turnstileToken: state.turnstileToken || undefined
       })
     });
     if (!response.ok) {
@@ -2963,7 +3178,42 @@ async function publishPage() {
     setStatus(message);
   } finally {
     setBusy(button, false);
+    resetTurnstile();
     if (published) renderShareKit();
+  }
+}
+
+async function unpublishPage() {
+  if (!state.publishId || !state.publishToken) {
+    setStatus(t("publish.nothingToUnpublish"));
+    return;
+  }
+  if (!window.confirm(t("publish.unpublishConfirm"))) return;
+  const button = $("#unpublishBtn");
+  try {
+    setBusy(button, true, t("publish.unpublishing"));
+    const response = await fetch(`${PUBLISH_ENDPOINT.replace(/\/$/, "")}/unpublish`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id: state.publishId, editToken: state.publishToken })
+    });
+    if (!response.ok) {
+      const detail = await response.json().catch(() => ({}));
+      throw new Error(detail.error || `HTTP ${response.status}`);
+    }
+    state.shareUrl = "";
+    state.publishId = "";
+    state.publishToken = "";
+    persist();
+    renderShareKit();
+    setPublishStatus(t("publish.unpublished"), "success");
+    setStatus(t("publish.unpublished"));
+  } catch (error) {
+    const message = `${t("publish.unpublishFailed")} ${error.message}`;
+    setPublishStatus(message, "error");
+    setStatus(message);
+  } finally {
+    setBusy(button, false);
   }
 }
 
