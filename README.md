@@ -27,7 +27,7 @@ Fonctions incluses:
 - choix du metier (Artiste / Technicien·ne du spectacle / Administration-production): adapte la page generee (intitule du role, presentation, parcours, intitules de sections, vocabulaire et valeurs par defaut) pour un rendu specifique a chaque profession;
 - champ specifique au metier, qui devient une section dediee de la page: Formation & distinctions (artiste), Habilitations & certifications / CACES (technicien·ne), Structures & budgets (administration). Question guidee correspondante posee selon le metier choisi;
 - un fil d'etapes (Racontez / Creez / Verifiez et exportez) qui suit la progression;
-- une zone d'echange avec un assistant local guide (par defaut, generation locale dans le navigateur, sans reseau);
+- une zone d'echange avec Mistral Small 3.1, execute cote serveur via Cloudflare Workers AI, avec assistant local de secours;
 - selection du public cible par etiquettes (commissaires, galeries, residences, institutions, collectionneurs, grand public), integree au texte genere;
 - generation locale d'un brouillon de portail a partir de la conversation;
 - choix de la voix du texte: premiere personne ("je") ou troisieme personne (au nom de l'artiste);
@@ -57,7 +57,7 @@ Fonctions incluses:
 - mode "conversation guidee": l'assistant pose une question a la fois (nom, lieu, medium, themes, oeuvres, public, objectifs, contact), avec des relances chaleureuses; les reponses sont rattachees a leur champ et alimentent directement la page;
 - en mode guide, une reponse dictee est envoyee automatiquement a la fin de la dictee, et les questions peuvent etre lues a voix haute (synthese vocale, optionnelle);
 - saisie vocale directement dans le message de chat;
-- connecteur optionnel vers un proxy LLM;
+- connexion Mistral par defaut, sans cle API exposee dans le navigateur, et endpoint alternatif optionnel pour les tests;
 - import d'images local, stocke dans IndexedDB (resiste aux limites de localStorage);
 - etats de chargement et boutons desactives pendant la generation/export;
 - garde-fou: confirmation avant export/impression si la liste de verification n'est pas cochee;
@@ -92,9 +92,11 @@ Ce prototype ne pretend pas etre certifie par France Travail. Il applique une po
 - EU AI Act: pas de scoring, pas de tri de candidats, pas de decision automatisee;
 - UX inspiree DSFR: simple, lisible, fiable, orientee tache.
 
-## Integration LLM
+## Integration Mistral
 
-La page fonctionne sans reseau avec un generateur local. Pour brancher un modele, renseigner un endpoint proxy dans "Option avancée : connecter un modèle d'IA".
+Le modele par defaut est `@cf/mistralai/mistral-small-3.1-24b-instruct`, appele par le Cloudflare Worker via son binding Workers AI. Aucune cle API n'est envoyee au navigateur. En cas d'indisponibilite, le generateur local permet de continuer.
+
+Le champ avance permet uniquement de remplacer temporairement l'endpoint Mistral pendant un test technique.
 
 Le proxy doit accepter:
 

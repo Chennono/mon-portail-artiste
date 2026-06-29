@@ -1,4 +1,4 @@
-# Service de publication — Cloudflare Worker + KV
+# Publication et assistant Mistral — Cloudflare Worker
 
 Ce petit service reçoit la page HTML exportée et la met en ligne à une URL publique
 personnalisée (`https://…/p/nom-artiste`). Il permet le bouton **« Publier ma page »** de l'app.
@@ -6,6 +6,9 @@ personnalisée (`https://…/p/nom-artiste`). Il permet le bouton **« Publier m
 L'adresse créée lors de la première publication reste stable. Un jeton d'édition conservé
 dans le navigateur permet de mettre la page à jour sans changer son URL. Les nouvelles pages
 n'expirent plus automatiquement.
+
+Le même Worker expose `POST /ai` et exécute Mistral Small 3.1 avec le binding Workers AI.
+Aucune clé Mistral n'est exposée dans le navigateur ou stockée dans le dépôt.
 
 ## Prérequis
 - Un compte **Cloudflare** (gratuit) : https://dash.cloudflare.com/sign-up
@@ -27,6 +30,8 @@ npx wrangler kv namespace create PORTAILS
 # 4. Déployer
 npx wrangler deploy
 ```
+
+Le binding `[ai]` est déjà déclaré dans `wrangler.toml`; aucune clé API supplémentaire n'est nécessaire.
 
 `wrangler deploy` affiche l'URL du service, par ex. :
 `https://mon-portail-artiste-publish.VOTRE-SOUS-DOMAINE.workers.dev`

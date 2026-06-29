@@ -1,7 +1,8 @@
-// Mon Portail Artiste — service de publication (Cloudflare Worker + KV)
+// Mon Portail Artiste — publication et assistant Mistral (Cloudflare Worker)
 //
 // POST /publish  { html, slug, id?, editToken? } -> { url, id, editToken? }
 // GET  /p/<id>                                      -> sert la page HTML stockée
+// POST /ai       { mode, messages, prompt }         -> réponse Mistral
 //
 // Stockage : KV namespace lié sous le nom PORTAILS (voir wrangler.toml).
 // Une première publication crée une adresse personnalisée et un jeton d'édition.
@@ -14,6 +15,39 @@ const CORS = {
 };
 
 const MAX_BYTES = 5_000_000; // 5 Mo (les images sont intégrées en base64)
+const MAX_AI_BYTES = 80_000;
+const MISTRAL_MODEL = "@cf/mistralai/mistral-small-3.1-24b-instruct";
+
+const PORTAL_SCHEMA = {
+  type: "object",
+  properties: {
+    name: { type: "string" },
+    location: { type: "string" },
+    tagline: { type: "string" },
+    statement: { type: "string" },
+    bio: { type: "string" },
+    goals: { type: "string" },
+    contact: { type: "string" },
+    seo: { type: "string" },
+    keywords: { type: "array", items: { type: "string" } },
+    works: {
+      type: "array",
+      items: {
+        type: "object",
+        properties: {
+          title: { type: "string" },
+          year: { type: "string" },
+          medium: { type: "string" },
+          description: { type: "string" }
+        },
+        required: ["title", "year", "medium", "description"]
+      }
+    },
+    links: { type: "array", items: { type: "string" } },
+    complianceNote: { type: "string" }
+  },
+  required: ["name", "location", "tagline", "statement", "bio", "goals", "contact", "seo", "keywords", "works", "links", "complianceNote"]
+};
 
 export default {
   async fetch(request, env) {
@@ -21,6 +55,10 @@ export default {
 
     if (request.method === "OPTIONS") {
       return new Response(null, { headers: CORS });
+    }
+
+    if (request.method === "POST" && url.pathname === "/ai") {
+      return handleAi(request, env);
     }
 
     // Servir une page publiée
@@ -86,9 +124,126 @@ export default {
       return json({ url: portalUrl(url.origin, id), id, editToken: newEditToken, permanent: true, updated: false }, 201);
     }
 
-    return json({ service: "Mon Portail Artiste — publication", permanentUrls: true, endpoints: ["POST /publish", "GET /p/:id"] });
+    return json({
+      service: "Mon Portail Artiste — publication et IA",
+      model: MISTRAL_MODEL,
+      permanentUrls: true,
+      endpoints: ["POST /ai", "POST /publish", "GET /p/:id"]
+    });
   }
 };
+
+async function handleAi(request, env) {
+  const contentLength = Number(request.headers.get("Content-Length") || 0);
+  if (contentLength > MAX_AI_BYTES) return json({ error: "Conversation trop volumineuse." }, 413);
+
+  let body;
+  try {
+    body = await request.json();
+  } catch {
+    return json({ error: "Corps JSON invalide." }, 400);
+  }
+  if (JSON.stringify(body).length > MAX_AI_BYTES) return json({ error: "Conversation trop volumineuse." }, 413);
+
+  const mode = body?.mode === "generate" ? "generate" : body?.mode === "chat" ? "chat" : "";
+  if (!mode) return json({ error: "Mode IA invalide." }, 400);
+
+  const messages = sanitizeMessages(body.messages);
+  if (!messages.some((message) => message.role === "user")) {
+    return json({ error: "Ajoutez d'abord un message sur votre pratique." }, 400);
+  }
+  if (!(await withinAiRateLimit(request, env.PORTAILS))) {
+    return json({ error: "Trop de demandes ont été envoyées. Réessayez dans quelques minutes." }, 429);
+  }
+
+  const system = mode === "generate" ? generationSystemPrompt() : chatSystemPrompt();
+  const aiMessages = [{ role: "system", content: system }, ...messages];
+
+  const options = {
+    messages: aiMessages,
+    max_tokens: mode === "generate" ? 1_800 : 420,
+    temperature: mode === "generate" ? 0.2 : 0.35,
+    repetition_penalty: 1.08
+  };
+  if (mode === "generate") options.guided_json = PORTAL_SCHEMA;
+
+  try {
+    const result = await env.AI.run(MISTRAL_MODEL, options);
+    const response = result?.response;
+    if (mode === "chat") {
+      const reply = typeof response === "string" ? response.trim() : "";
+      if (!reply) throw new Error("Réponse de conversation vide");
+      return json({ reply, model: "Mistral Small 3.1" });
+    }
+
+    const portal = parseAiObject(response);
+    if (!portal || typeof portal.name !== "string") throw new Error("Réponse structurée invalide");
+    return json(portal);
+  } catch (error) {
+    console.error(JSON.stringify({ event: "mistral_error", mode, message: error instanceof Error ? error.message : String(error) }));
+    return json({ error: "Mistral est momentanément indisponible. Le brouillon local reste accessible." }, 502);
+  }
+}
+
+async function withinAiRateLimit(request, portals) {
+  const ip = request.headers.get("CF-Connecting-IP") || "local";
+  const hour = new Date().toISOString().slice(0, 13);
+  const digest = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(ip));
+  const visitor = Array.from(new Uint8Array(digest).slice(0, 10), (byte) => byte.toString(16).padStart(2, "0")).join("");
+  const key = `_ai_rate:${hour}:${visitor}`;
+  try {
+    const count = Number(await portals.get(key)) || 0;
+    if (count >= 40) return false;
+    await portals.put(key, String(count + 1), { expirationTtl: 7_200 });
+  } catch (error) {
+    console.error(JSON.stringify({ event: "ai_rate_limit_error", message: error instanceof Error ? error.message : String(error) }));
+  }
+  return true;
+}
+
+function sanitizeMessages(input) {
+  if (!Array.isArray(input)) return [];
+  let remaining = 24_000;
+  return input
+    .slice(-18)
+    .map((message) => {
+      const role = message?.role === "assistant" ? "assistant" : message?.role === "user" ? "user" : "";
+      const content = cleanText(message?.content, Math.min(6_000, remaining));
+      remaining -= content.length;
+      return { role, content };
+    })
+    .filter((message) => message.role && message.content && remaining >= 0);
+}
+
+function cleanText(value, maxLength) {
+  return typeof value === "string" ? value.replace(/\u0000/g, "").trim().slice(0, Math.max(0, maxLength)) : "";
+}
+
+function parseAiObject(response) {
+  if (response && typeof response === "object" && !Array.isArray(response)) return response;
+  if (typeof response !== "string") return null;
+  const cleaned = response.trim().replace(/^```(?:json)?\s*/i, "").replace(/\s*```$/, "");
+  try {
+    return JSON.parse(cleaned);
+  } catch {
+    const start = cleaned.indexOf("{");
+    const end = cleaned.lastIndexOf("}");
+    if (start < 0 || end <= start) return null;
+    try {
+      return JSON.parse(cleaned.slice(start, end + 1));
+    } catch {
+      return null;
+    }
+  }
+}
+
+function chatSystemPrompt() {
+  return `Tu es l'assistant Mistral de Mon Portail Artiste. Tu aides des artistes et professionnels du spectacle à transformer leurs mots en page professionnelle. Réponds dans la langue du dernier message, en français si elle est incertaine. Sois chaleureux, concret et facile à comprendre pour une personne peu à l'aise avec le numérique. Pose au maximum une seule question courte. N'invente jamais de parcours, prix, exposition, compétence ou contact. Ne classe pas et n'évalue pas la personne. Ne demande pas de donnée sensible inutile.`;
+}
+
+function generationSystemPrompt() {
+  return `Tu es l'assistant éditorial Mistral de Mon Portail Artiste. À partir des seuls faits donnés par la personne, prépare le contenu de son portail professionnel. Écris dans la langue principalement utilisée dans la conversation, avec un ton accueillant, précis et naturel. N'invente jamais de parcours, prix, exposition, compétence, œuvre, date, lieu, lien ou contact. Si une information manque, laisse une chaîne vide ou un tableau vide. Le statement explique la démarche; la bio reste factuelle; la tagline est courte; le SEO est une méta-description et ne doit pas devenir une section visible. Les œuvres doivent uniquement reprendre celles citées. Le complianceNote doit rappeler que le contenu est assisté par IA, modifiable et à relire par l'artiste. Retourne uniquement l'objet JSON demandé.`;
+}
 
 function parseRecord(stored) {
   if (!stored) return null;

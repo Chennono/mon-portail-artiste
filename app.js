@@ -3,6 +3,7 @@ const STORAGE_KEY = "mon-portail-artiste-chat-fr-v2";
 // ex. "https://mon-portail-artiste-publish.VOTRE-SOUS-DOMAINE.workers.dev".
 // Laisser vide désactive le bouton « Publier » (le reste de l'app fonctionne).
 const PUBLISH_ENDPOINT = "https://mon-portail-artiste-publish.artiste-personnalise.workers.dev";
+const AI_ENDPOINT = `${PUBLISH_ENDPOINT.replace(/\/$/, "")}/ai`;
 const IDB_NAME = "mon-portail-artiste-db";
 const IDB_STORE = "kv";
 const IMAGES_KEY = "images";
@@ -170,7 +171,7 @@ const I18N = {
     "share.publishNote": "Publish your page with its images. Your personal address stays the same for future updates.",
     "share.retentionNote": "This address does not change and the page no longer expires automatically.",
     "publish.btn": "Publish my page", "publish.updateBtn": "Update my published page", "publish.inProgress": "Publishing…", "publish.done": "Your page is online! Its permanent link has been copied.", "publish.updated": "Your page has been updated at the same address. The link has been copied.", "publish.failed": "Publishing failed:", "publish.needPage": "Create your page first, then publish it.", "publish.notConfigured": "The publishing service is not configured yet.", "publish.reviewRequired": "Before publishing, please tick the three verification boxes below.", "publish.ready": "Everything is ready. You can publish your page.", "publish.urlLabel": "Your personal address", "publish.copyBtn": "Copy link", "publish.copied": "Permanent link copied.",
-    "studio.intro": "Go at your own pace: tell us about your background, your works, your goals. The assistant prepares a clear draft — generated locally in your browser by default — that you can review, edit and export.",
+    "studio.intro": "Go at your own pace: tell us about your background, your works, your goals. The Mistral assistant prepares a clear draft that you can review, edit and export.",
     "hero.problem": "Today, many performing-arts professionals only exist online through social networks and their algorithms. A personal portal gives you back a stable space of your own to show your work.",
     "trust.unofficial": "Unofficial", "trust.rgaa": "RGAA accessibility", "trust.human": "Human validation", "trust.export": "Exportable",
     "step.tell": "Tell us about your practice", "step.create": "Create your page", "step.verify": "Review and export",
@@ -190,9 +191,10 @@ const I18N = {
     "audience.curators": "Curators", "audience.galleries": "Galleries", "audience.residencies": "Residencies", "audience.institutions": "Institutions", "audience.collectors": "Collectors", "audience.public": "General public",
     "label.upload": "Add a few images of your works, if you wish",
     "btn.sample": "See an example", "btn.advice": "Ask for advice",
-    "advanced.summary": "Advanced option: connect an AI model",
-    "advanced.label": "Proxy endpoint for the AI model",
-    "advanced.note": "For a real deployment, use a secure intermediary server. Never put an API key directly in this page.",
+    "ai.badge": "Mistral AI",
+    "advanced.summary": "Advanced option: use another endpoint",
+    "advanced.label": "Alternative AI endpoint (optional)",
+    "advanced.note": "Mistral is already connected securely. This field is only for technical testing; never place an API key here.",
     "status.default": "You can start with a few sentences, or use the example to try it out.",
     "preview.eyebrow": "Step 2 · Preview", "preview.title": "Preview of your page",
     "btn.exportHtml": "Export HTML", "btn.exportJson": "Export JSON", "btn.print": "Print",
@@ -264,7 +266,7 @@ const I18N = {
     "share.publishNote": "发布包含图片的个人页面。以后更新页面时，你的个人网址不会改变。",
     "share.retentionNote": "这个网址不会改变，页面也不再自动过期。",
     "publish.btn": "发布我的页面", "publish.updateBtn": "更新已发布页面", "publish.inProgress": "正在发布……", "publish.done": "个人页面已上线，固定网址已复制。", "publish.updated": "页面已在同一网址更新，链接已复制。", "publish.failed": "发布失败:", "publish.needPage": "请先创建个人页面，再进行发布。", "publish.notConfigured": "发布服务尚未配置。", "publish.reviewRequired": "发布前，请先勾选下方三个确认选项。", "publish.ready": "准备完成，现在可以发布页面。", "publish.urlLabel": "你的个人网址", "publish.copyBtn": "复制链接", "publish.copied": "固定网址已复制。",
-    "studio.intro": "按自己的节奏来:讲讲你的经历、作品和愿望。助手会准备一份清晰的草稿——默认在你的浏览器本地生成——你可以审阅、修改并导出。",
+    "studio.intro": "按自己的节奏来:讲讲你的经历、作品和愿望。Mistral 助手会准备一份清晰的草稿,你可以审阅、修改并导出。",
     "hero.problem": "如今,许多演艺从业者只能通过社交网络及其算法在线“存在”。一个个人门户让你重新拥有一个属于自己的稳定空间来展示作品。",
     "trust.unofficial": "非官方", "trust.rgaa": "RGAA 无障碍", "trust.human": "人工审核", "trust.export": "可导出",
     "step.tell": "讲述你的创作", "step.create": "创建页面", "step.verify": "检查并导出",
@@ -284,9 +286,10 @@ const I18N = {
     "audience.curators": "策展人", "audience.galleries": "画廊", "audience.residencies": "驻地项目", "audience.institutions": "机构", "audience.collectors": "收藏家", "audience.public": "大众",
     "label.upload": "如果愿意,可添加几张作品图片",
     "btn.sample": "查看示例", "btn.advice": "请求建议",
-    "advanced.summary": "高级选项:连接 AI 模型",
-    "advanced.label": "AI 模型的代理端点",
-    "advanced.note": "实际部署时,请使用安全的中间服务器。切勿在此页面中直接放置 API 密钥。",
+    "ai.badge": "Mistral AI",
+    "advanced.summary": "高级选项:使用其他端点",
+    "advanced.label": "备用 AI 端点(可选)",
+    "advanced.note": "Mistral 已安全接入。此处仅用于技术测试,请勿在此填写 API 密钥。",
     "status.default": "你可以先写几句话,或使用示例来体验。",
     "preview.eyebrow": "第 2 步 · 预览", "preview.title": "页面预览",
     "btn.exportHtml": "导出 HTML", "btn.exportJson": "导出 JSON", "btn.print": "打印",
@@ -1052,22 +1055,11 @@ async function sendMessage() {
   try {
     setBusy(sendBtn, true, "Analyse en cours…");
     setBusy(composerSendBtn, true, "Envoi…");
-    const endpoint = $("#llmEndpoint").value.trim();
-    if (endpoint) {
-      try {
-        const response = await fetch(endpoint, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ mode: "chat", messages: state.messages, prompt: buildChatPrompt() })
-        });
-        if (!response.ok) throw new Error(`HTTP ${response.status}`);
-        const payload = await response.json();
-        state.messages.push({ role: "assistant", content: payload.reply || localAssistantReply() });
-      } catch (error) {
-        state.messages.push({ role: "assistant", content: `${localAssistantReply()}\n\nLe modèle connecté n'a pas répondu. J'utilise donc l'assistant local pour continuer. Détail : ${error.message}` });
-      }
-    } else {
-      state.messages.push({ role: "assistant", content: localAssistantReply() });
+    try {
+      const payload = await requestAi("chat", buildChatPrompt());
+      state.messages.push({ role: "assistant", content: payload.reply || localAssistantReply() });
+    } catch {
+      state.messages.push({ role: "assistant", content: `${localAssistantReply()}\n\nMistral est momentanément indisponible. L'assistant local prend le relais pour que vous puissiez continuer.` });
     }
 
     renderMessages();
@@ -1097,26 +1089,13 @@ async function generatePortal() {
 
   try {
     setBusy(generateBtn, true, "Création en cours…");
-    const endpoint = $("#llmEndpoint").value.trim();
-
-    if (endpoint) {
-      try {
-        const response = await fetch(endpoint, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ mode: "generate", messages: state.messages, prompt: buildGenerationPrompt(), images: summarizeImages() })
-        });
-        if (!response.ok) throw new Error(`HTTP ${response.status}`);
-        const payload = await response.json();
-        state.draft = normalizeDraft(payload);
-        setStatus("La page est prête. Prenez le temps de vérifier les faits, les images et le ton avant toute publication.");
-      } catch (error) {
-        state.draft = buildLocalDraft();
-        setStatus(`Le modèle connecté n'a pas répondu. J'ai créé une version locale que vous pouvez déjà modifier. Détail : ${error.message}`);
-      }
-    } else {
+    try {
+      const payload = await requestAi("generate", buildGenerationPrompt(), { images: summarizeImages() });
+      state.draft = normalizeDraft(payload);
+      setStatus("La page créée avec Mistral est prête. Prenez le temps de vérifier les faits, les images et le ton avant toute publication.");
+    } catch {
       state.draft = buildLocalDraft();
-      setStatus("Une première page est générée. Vous pouvez cliquer sur les textes dans l'aperçu pour les ajuster.");
+      setStatus("Mistral est momentanément indisponible. J'ai créé une version locale que vous pouvez déjà modifier.");
     }
 
     renderMessages();
@@ -2871,6 +2850,18 @@ function buildChatPrompt() {
 
 function buildGenerationPrompt() {
   return `Génère en français une page personnelle d'artiste, claire, accueillante et modifiable, à partir de cette conversation. Style souhaité : ${state.pageStyle}; animation : ${state.motionStyle}. Retourne un JSON avec name, location, tagline, statement, bio, goals, contact, seo, keywords, works, links, complianceNote. N'invente pas de faits de carrière. Signale que le contenu est assisté par IA et doit être relu. Conversation : ${JSON.stringify(state.messages)}`;
+}
+
+async function requestAi(mode, prompt, extra = {}) {
+  const endpoint = $("#llmEndpoint").value.trim() || AI_ENDPOINT;
+  const response = await fetch(endpoint, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ mode, messages: state.messages, prompt, ...extra })
+  });
+  const payload = await response.json().catch(() => ({}));
+  if (!response.ok) throw new Error(payload.error || `HTTP ${response.status}`);
+  return payload;
 }
 
 function exportJson() {

@@ -17,7 +17,7 @@
 
     <title>Mon Portail Artiste - creer son portail avec l'aide de l'IA</title>
     <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
-    <link rel="stylesheet" href="styles.css?v=20260629-1">
+    <link rel="stylesheet" href="styles.css?v=20260629-2">
   </head>
   <body>
     <a class="skip-link" href="#main" data-i18n="skip">Aller au contenu principal</a>
@@ -53,7 +53,7 @@
           <div class="service-chip" data-i18n="studio.chip">Accompagnement numérique · Professionnels du spectacle</div>
           <p class="eyebrow" data-i18n="studio.eyebrow">Décrivez votre métier : un assistant vous aide à structurer votre page</p>
           <h2 id="studio-title" data-i18n="studio.title">Un échange simple pour créer votre portail professionnel</h2>
-          <p data-i18n="studio.intro">Avancez à votre rythme : racontez votre parcours, vos œuvres, vos envies. L'assistant prépare un brouillon clair — généré localement dans votre navigateur par défaut — que vous pouvez relire, modifier et exporter.</p>
+          <p data-i18n="studio.intro">Avancez à votre rythme : racontez votre parcours, vos œuvres, vos envies. L'assistant Mistral prépare un brouillon clair que vous pouvez relire, modifier et exporter.</p>
           <p class="hero-problem" data-i18n="hero.problem">Aujourd'hui, beaucoup de professionnels du spectacle n'existent en ligne qu'à travers les réseaux sociaux et leurs algorithmes. Un portail personnel vous redonne un espace stable, qui vous appartient, pour montrer votre travail.</p>
           <div class="trust-row" aria-label="Principes du service">
             <span data-i18n="trust.unofficial">Non officiel</span>
@@ -77,7 +77,10 @@
                 <p class="eyebrow" data-i18n="chat.eyebrow">Étape 1 · Conversation</p>
                 <h3 id="chat-title" data-i18n="chat.title">Parlez de votre travail</h3>
               </div>
-              <span id="voiceBadge" class="badge">Vérification du micro...</span>
+              <div class="panel-badges">
+                <span class="badge ai-badge" data-i18n="ai.badge">Mistral AI</span>
+                <span id="voiceBadge" class="badge">Vérification du micro...</span>
+              </div>
             </div>
 
             <div id="chatLog" class="chat-log" aria-live="polite"></div>
@@ -252,10 +255,10 @@
             </div>
 
             <details class="advanced">
-              <summary data-i18n="advanced.summary">Option avancée : connecter un modèle d'IA</summary>
-              <label for="llmEndpoint" data-i18n="advanced.label">Endpoint proxy pour le modèle d'IA</label>
+              <summary data-i18n="advanced.summary">Option avancée : utiliser un autre endpoint</summary>
+              <label for="llmEndpoint" data-i18n="advanced.label">Endpoint IA alternatif (optionnel)</label>
               <input id="llmEndpoint" inputmode="url" placeholder="https://your-server.example/artist-portal">
-              <p data-i18n="advanced.note">Pour un déploiement réel, utilisez un serveur intermédiaire sécurisé. Ne placez jamais de clé API directement dans cette page.</p>
+              <p data-i18n="advanced.note">Mistral est déjà connecté de manière sécurisée. Ce champ sert uniquement aux tests techniques ; ne placez jamais de clé API ici.</p>
             </details>
 
             <div id="statusBox" class="status" role="status" aria-live="polite" data-i18n="status.default">Vous pouvez commencer par quelques phrases, ou utiliser l'exemple pour essayer.</div>
@@ -476,6 +479,6 @@
       </div>
     </template>
 
-    <script src="app.js?v=20260629-1"></script>
+    <script src="app.js?v=20260629-2"></script>
   </body>
 </html>

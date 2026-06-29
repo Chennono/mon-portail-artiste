@@ -909,6 +909,20 @@ textarea {
   border-radius: 4px;
 }
 
+.panel-badges {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.ai-badge {
+  color: #161616;
+  background: #f6c600;
+  border-color: #d7b000;
+}
+
 .advanced summary {
   cursor: pointer;
   font-weight: 700;
