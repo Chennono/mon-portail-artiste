@@ -1,0 +1,489 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="Assistant guide pour creer un portail artiste clair, modifiable et exportable.">
+
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="Mon Portail Artiste">
+    <meta property="og:description" content="Créez votre portail d'artiste visuel : présentation, œuvres, objectifs et contact, dans un format clair et exportable.">
+    <meta property="og:locale" content="fr_FR">
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:title" content="Mon Portail Artiste">
+    <meta name="twitter:description" content="Créez votre portail d'artiste visuel, clair et exportable.">
+
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%23000091'/%3E%3Crect x='6' y='6' width='6' height='20' fill='%23f6c600'/%3E%3Ctext x='17' y='22' font-family='Arial' font-size='13' font-weight='bold' fill='white'%3EM%3C/text%3E%3C/svg%3E">
+
+    <title>Mon Portail Artiste - creer son portail avec l'aide de l'IA</title>
+    <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <a class="skip-link" href="#main" data-i18n="skip">Aller au contenu principal</a>
+
+    <header class="app-header">
+      <div class="republic-mark" aria-label="République Française">
+        <span class="flag-strip" aria-hidden="true"><i></i><i></i><i></i></span>
+        <span>République<br>Française</span>
+      </div>
+      <div class="brand">
+        <span class="brand-mark" aria-hidden="true">MPA</span>
+        <div>
+          <p data-i18n="brand.tagline">Prototype non officiel · inspiré service public</p>
+          <h1>Mon Portail Artiste</h1>
+        </div>
+      </div>
+      <nav aria-label="Navigation principale">
+        <a href="#studio" data-i18n="nav.create">Créer</a>
+        <a href="#uses" data-i18n="nav.uses">Usages</a>
+        <a href="#compliance" data-i18n="nav.trust">Confiance</a>
+        <a href="#research" data-i18n="nav.research">Recherche</a>
+        <select id="langSwitch" class="lang-switch" aria-label="Langue de l'interface / Interface language">
+          <option value="fr">FR</option>
+          <option value="en">EN</option>
+          <option value="zh">中文</option>
+        </select>
+      </nav>
+    </header>
+
+    <main id="main">
+      <section id="studio" class="studio" aria-labelledby="studio-title">
+        <div class="studio-heading">
+          <div class="service-chip" data-i18n="studio.chip">Accompagnement numérique · Professionnels du spectacle</div>
+          <p class="eyebrow" data-i18n="studio.eyebrow">Décrivez votre métier : un assistant vous aide à structurer votre page</p>
+          <h2 id="studio-title" data-i18n="studio.title">Un échange simple pour créer votre portail professionnel</h2>
+          <p data-i18n="studio.intro">Avancez à votre rythme : racontez votre parcours, vos œuvres, vos envies. L'assistant prépare un brouillon clair — généré localement dans votre navigateur par défaut — que vous pouvez relire, modifier et exporter.</p>
+          <p class="hero-problem" data-i18n="hero.problem">Aujourd'hui, beaucoup de professionnels du spectacle n'existent en ligne qu'à travers les réseaux sociaux et leurs algorithmes. Un portail personnel vous redonne un espace stable, qui vous appartient, pour montrer votre travail.</p>
+          <div class="trust-row" aria-label="Principes du service">
+            <span data-i18n="trust.unofficial">Non officiel</span>
+            <span data-i18n="trust.rgaa">Accessibilité RGAA</span>
+            <span data-i18n="trust.human">Validation humaine</span>
+            <span data-i18n="trust.export">Exportable</span>
+          </div>
+        </div>
+
+        <ol id="stepper" class="stepper" aria-label="Étapes pour créer votre portail">
+          <li data-step="1" data-i18n="step.tell">Racontez votre pratique</li>
+          <li data-step="2" data-i18n="step.create">Créez votre page</li>
+          <li data-step="3" data-i18n="step.verify">Vérifiez et exportez</li>
+        </ol>
+
+        <div class="studio-grid">
+          <section class="chat-panel" aria-labelledby="chat-title">
+            <div class="art-rail" aria-hidden="true"></div>
+            <div class="panel-head">
+              <div>
+                <p class="eyebrow" data-i18n="chat.eyebrow">Étape 1 · Conversation</p>
+                <h3 id="chat-title" data-i18n="chat.title">Parlez de votre travail</h3>
+              </div>
+              <span id="voiceBadge" class="badge">Vérification du micro...</span>
+            </div>
+
+            <div id="chatLog" class="chat-log" aria-live="polite"></div>
+
+            <div class="composer">
+              <div class="profession-row">
+                <label for="professionStyle" data-i18n="label.profession">Votre métier</label>
+                <select id="professionStyle">
+                  <option value="artiste" selected data-i18n="prof.artiste">Artiste</option>
+                  <option value="technicien" data-i18n="prof.technicien">Technicien·ne du spectacle</option>
+                  <option value="gestion" data-i18n="prof.gestion">Administration / production</option>
+                </select>
+              </div>
+
+              <div class="guided-bar">
+                <button id="guidedBtn" class="button secondary" type="button" data-i18n="guided.start">Conversation guidée</button>
+                <label class="speak-toggle"><input type="checkbox" id="speakToggle"> <span data-i18n="guided.speak">Lire les questions à voix haute</span></label>
+              </div>
+
+              <label for="artistMessage" data-i18n="label.message">Racontez ce que vous voulez mettre en avant</label>
+              <textarea id="artistMessage" rows="8" data-i18n-ph="placeholder.message" placeholder="Exemple : Je m'appelle Lina Moreau, je suis artiste visuelle à Marseille. Je travaille la peinture, la photographie et l'installation textile. Mes œuvres parlent de mémoire familiale, d'écologie urbaine et d'objets du quotidien. J'aimerais que cette page s'adresse aux commissaires d'exposition, galeries, résidences et institutions culturelles."></textarea>
+              <div class="composer-send">
+                <p class="composer-hint" data-i18n="composer.enterHint">Entrée pour envoyer · Maj+Entrée pour un retour à la ligne</p>
+                <button id="composerSendBtn" class="button primary send-btn" type="button" data-i18n="composer.send">Envoyer ➤</button>
+              </div>
+
+              <div class="composer-tools">
+                <label for="voiceLang" data-i18n="label.voiceLang">Langue de la dictée</label>
+                <select id="voiceLang">
+                  <option value="fr-FR" selected data-i18n="voicelang.fr">Français</option>
+                  <option value="zh-CN" data-i18n="voicelang.zh">Chinois mandarin</option>
+                  <option value="en-US" data-i18n="voicelang.en">Anglais</option>
+                </select>
+                <button id="voiceBtn" class="button secondary" type="button" data-i18n="btn.dictate">Dicter</button>
+              </div>
+
+              <div class="design-tools" aria-label="Choix du style de page">
+                <label for="pageStyle" data-i18n="label.pageStyle">Style de page</label>
+                <select id="pageStyle">
+                  <option value="minimal" selected data-i18n="style.minimal">Sobre et professionnel</option>
+                  <option value="gallery" data-i18n="style.gallery">Portfolio galerie</option>
+                  <option value="editorial" data-i18n="style.editorial">Revue d'art</option>
+                  <option value="dark" data-i18n="style.dark">Immersif sombre</option>
+                </select>
+
+                <label for="motionStyle" data-i18n="label.motion">Animation</label>
+                <select id="motionStyle">
+                  <option value="none" data-i18n="motion.none">Sans animation</option>
+                  <option value="subtle" selected data-i18n="motion.subtle">Transitions douces</option>
+                  <option value="dynamic" data-i18n="motion.dynamic">Effet exposition</option>
+                </select>
+
+                <label for="personStyle" data-i18n="label.person">Voix du texte</label>
+                <select id="personStyle">
+                  <option value="third" selected data-i18n="person.third">Troisième personne (au nom)</option>
+                  <option value="first" data-i18n="person.first">Première personne (je)</option>
+                </select>
+
+                <label for="layoutStyle" data-i18n="label.layout">Mise en page</label>
+                <select id="layoutStyle">
+                  <option value="editorial" selected data-i18n="layout.editorial">Éditorial / revue</option>
+                  <option value="standard" data-i18n="layout.standard">Colonnes (standard)</option>
+                  <option value="centre" data-i18n="layout.centre">Une colonne centrée</option>
+                  <option value="affiche" data-i18n="layout.affiche">Affiche (titre géant)</option>
+                  <option value="mosaique" data-i18n="layout.mosaique">Mosaïque</option>
+                  <option value="defilement" data-i18n="layout.defilement">Défilement horizontal</option>
+                </select>
+
+                <label for="titleFont" data-i18n="label.titleFont">Police des titres</label>
+                <select id="titleFont">
+                  <option value="default" selected data-i18n="font.default">Selon le style</option>
+                  <option value="marianne">Marianne</option>
+                  <option value="georgia">Georgia (serif)</option>
+                  <option value="times">Times (serif)</option>
+                  <option value="helvetica">Helvetica (sans)</option>
+                  <option value="courier">Courier (machine à écrire)</option>
+                  <option value="playfair">Playfair Display</option>
+                  <option value="space">Space Grotesk</option>
+                  <option value="dmserif">DM Serif Display</option>
+                  <option value="syne">Syne (art contemporain)</option>
+                  <option value="abril">Abril Fatface (titre dramatique)</option>
+                  <option value="cormorant">Cormorant Garamond (élégant)</option>
+                  <option value="bodoni">Bodoni Moda (mode)</option>
+                  <option value="caveat">Caveat (manuscrit)</option>
+                  <option value="bricolage">Bricolage Grotesque</option>
+                </select>
+
+                <label for="bodyFont" data-i18n="label.bodyFont">Police du texte</label>
+                <select id="bodyFont">
+                  <option value="default" selected data-i18n="font.default">Selon le style</option>
+                  <option value="marianne">Marianne</option>
+                  <option value="georgia">Georgia (serif)</option>
+                  <option value="times">Times (serif)</option>
+                  <option value="helvetica">Helvetica (sans)</option>
+                  <option value="courier">Courier (machine à écrire)</option>
+                  <option value="playfair">Playfair Display</option>
+                  <option value="space">Space Grotesk</option>
+                  <option value="dmserif">DM Serif Display</option>
+                  <option value="syne">Syne (art contemporain)</option>
+                  <option value="abril">Abril Fatface (titre dramatique)</option>
+                  <option value="cormorant">Cormorant Garamond (élégant)</option>
+                  <option value="bodoni">Bodoni Moda (mode)</option>
+                  <option value="caveat">Caveat (manuscrit)</option>
+                  <option value="bricolage">Bricolage Grotesque</option>
+                </select>
+              </div>
+
+              <div id="styleGallery" class="style-gallery" role="group" aria-label="Aperçu rapide des styles de page"></div>
+
+              <div class="palette-tools" role="group" aria-label="Couleurs de la page">
+                <span class="palette-label" data-i18n="palette.label">Couleurs de la page</span>
+                <div id="paletteSwatches" class="palette-swatches"></div>
+                <div class="palette-fields">
+                  <label class="palette-field"><span data-i18n="palette.bg">Fond</span><input type="color" id="bgColor" value="#fbfaf6"></label>
+                  <label class="palette-field"><span data-i18n="palette.accent">Accent</span><input type="color" id="accentColor" value="#2d6b52"></label>
+                  <label class="palette-field"><span data-i18n="palette.intensity">Intensité du fond</span><input type="range" id="bgIntensity" min="0" max="100" value="35"></label>
+                  <button id="generatePaletteBtn" class="button secondary" type="button" data-i18n="palette.generate">Générer un fond</button>
+                  <button id="resetPaletteBtn" class="button secondary" type="button" data-i18n="palette.reset">Réinitialiser</button>
+                </div>
+              </div>
+
+              <fieldset class="audience-picker">
+                <legend data-i18n="audience.legend">À qui s'adresse votre page ? (optionnel)</legend>
+                <label class="chip"><input type="checkbox" class="audience-tag" value="les commissaires d'exposition"> <span data-i18n="audience.curators">Commissaires</span></label>
+                <label class="chip"><input type="checkbox" class="audience-tag" value="les galeries"> <span data-i18n="audience.galleries">Galeries</span></label>
+                <label class="chip"><input type="checkbox" class="audience-tag" value="les résidences"> <span data-i18n="audience.residencies">Résidences</span></label>
+                <label class="chip"><input type="checkbox" class="audience-tag" value="les institutions culturelles"> <span data-i18n="audience.institutions">Institutions</span></label>
+                <label class="chip"><input type="checkbox" class="audience-tag" value="les collectionneurs"> <span data-i18n="audience.collectors">Collectionneurs</span></label>
+                <label class="chip"><input type="checkbox" class="audience-tag" value="le grand public"> <span data-i18n="audience.public">Grand public</span></label>
+              </fieldset>
+
+              <fieldset class="works-input">
+                <legend data-i18n="works.legend">Vos réalisations — œuvres, spectacles, productions (optionnel)</legend>
+                <div id="worksList" class="works-list"></div>
+                <button id="addWorkInputBtn" class="button secondary" type="button" data-i18n="works.add">+ Ajouter une œuvre</button>
+              </fieldset>
+
+              <label for="extraField" id="extraFieldLabel">Formation & distinctions (optionnel)</label>
+              <textarea id="extraField" rows="3" placeholder="Ex. : formations, prix, résidences ; ou habilitations (CACES, électrique…) ; ou structures et budgets gérés."></textarea>
+
+              <label for="imageUpload" data-i18n="label.upload">Ajoutez quelques images d'œuvres, si vous le souhaitez</label>
+              <input id="imageUpload" type="file" accept="image/*" multiple>
+              <div id="imageStrip" class="image-strip" aria-live="polite"></div>
+
+              <div class="actions">
+                <button id="sampleBtn" class="button secondary" type="button" data-i18n="btn.sample">Voir un exemple</button>
+                <button id="clearInputBtn" class="button secondary" type="button" data-i18n="btn.clearInput">Effacer la saisie</button>
+                <button id="sendBtn" class="button secondary" type="button" data-i18n="btn.advice">Demander un conseil</button>
+                <button id="generateBtn" class="button primary" type="button">Créer ma page</button>
+              </div>
+            </div>
+
+            <details class="advanced">
+              <summary data-i18n="advanced.summary">Option avancée : connecter un modèle d'IA</summary>
+              <label for="llmEndpoint" data-i18n="advanced.label">Endpoint proxy pour le modèle d'IA</label>
+              <input id="llmEndpoint" inputmode="url" placeholder="https://your-server.example/artist-portal">
+              <p data-i18n="advanced.note">Pour un déploiement réel, utilisez un serveur intermédiaire sécurisé. Ne placez jamais de clé API directement dans cette page.</p>
+            </details>
+
+            <div id="statusBox" class="status" role="status" aria-live="polite" data-i18n="status.default">Vous pouvez commencer par quelques phrases, ou utiliser l'exemple pour essayer.</div>
+          </section>
+
+          <section class="preview-panel" aria-labelledby="preview-title">
+            <div class="art-rail preview" aria-hidden="true"></div>
+            <div class="panel-head">
+              <div>
+                <p class="eyebrow" data-i18n="preview.eyebrow">Étape 2 · Aperçu</p>
+                <h3 id="preview-title" data-i18n="preview.title">Aperçu de votre page</h3>
+              </div>
+              <div class="actions compact">
+                <button id="exportHtmlBtn" class="button secondary" type="button" data-i18n="btn.exportHtml">Exporter HTML</button>
+                <button id="exportJsonBtn" class="button secondary" type="button" data-i18n="btn.exportJson">Exporter JSON</button>
+                <button id="printBtn" class="button secondary" type="button" data-i18n="btn.print">Imprimer</button>
+              </div>
+            </div>
+
+            <div id="pageEditorToolbar" class="page-editor-toolbar" aria-label="Modifier les modules et les textes" hidden>
+              <div class="editor-group module-add-group">
+                <label for="moduleType">Ajouter un module</label>
+                <select id="moduleType">
+                  <option value="text">Texte libre</option>
+                  <option value="works">Œuvres</option>
+                  <option value="contact">Contact</option>
+                  <option value="links">Liens</option>
+                  <option value="note">Note / information</option>
+                </select>
+                <button id="addModuleBtn" class="button secondary" type="button">Ajouter</button>
+              </div>
+
+              <div class="editor-group typography-tools" aria-label="Style du texte sélectionné">
+                <span class="editor-label">Texte sélectionné</span>
+                <button id="boldTextBtn" class="icon-button" type="button" title="Gras" aria-label="Gras"><strong>B</strong></button>
+                <button id="italicTextBtn" class="icon-button" type="button" title="Italique" aria-label="Italique"><em>I</em></button>
+                <label for="fontWeightSelect">Poids
+                  <select id="fontWeightSelect">
+                    <option value="">Auto</option>
+                    <option value="300">Léger</option>
+                    <option value="400">Normal</option>
+                    <option value="500">Moyen</option>
+                    <option value="700">Gras</option>
+                    <option value="800">Très gras</option>
+                  </select>
+                </label>
+                <label for="fontSizeSelect">Taille
+                  <select id="fontSizeSelect">
+                    <option value="">Auto</option>
+                    <option value="0.95rem">Petit</option>
+                    <option value="1rem">Normal</option>
+                    <option value="1.15rem">Grand</option>
+                    <option value="1.35rem">Très grand</option>
+                    <option value="1.7rem">Accent</option>
+                  </select>
+                </label>
+                <label for="lineHeightSelect">Interligne
+                  <select id="lineHeightSelect">
+                    <option value="">Auto</option>
+                    <option value="1.2">Serré</option>
+                    <option value="1.45">Normal</option>
+                    <option value="1.7">Aéré</option>
+                  </select>
+                </label>
+                <label for="textAlignSelect">Alignement
+                  <select id="textAlignSelect">
+                    <option value="">Auto</option>
+                    <option value="left">Gauche</option>
+                    <option value="center">Centre</option>
+                    <option value="right">Droite</option>
+                  </select>
+                </label>
+                <label for="letterSpacingRange">Espacement
+                  <input id="letterSpacingRange" type="range" min="0" max="2" step="0.1" value="0">
+                </label>
+                <button id="clearTextStyleBtn" class="button secondary" type="button">Réinitialiser</button>
+              </div>
+            </div>
+
+            <div id="floatingTextToolbar" class="floating-text-toolbar" role="toolbar" aria-label="Style rapide du texte sélectionné" hidden>
+              <button id="floatBoldTextBtn" class="icon-button" type="button" title="Gras" aria-label="Gras"><strong>B</strong></button>
+              <button id="floatItalicTextBtn" class="icon-button" type="button" title="Italique" aria-label="Italique"><em>I</em></button>
+              <label for="floatFontWeightSelect">Poids
+                <select id="floatFontWeightSelect">
+                  <option value="">Auto</option>
+                  <option value="300">Léger</option>
+                  <option value="400">Normal</option>
+                  <option value="500">Moyen</option>
+                  <option value="700">Gras</option>
+                  <option value="800">Très gras</option>
+                </select>
+              </label>
+              <label for="floatFontSizeSelect">Taille
+                <select id="floatFontSizeSelect">
+                  <option value="">Auto</option>
+                  <option value="0.95rem">Petit</option>
+                  <option value="1rem">Normal</option>
+                  <option value="1.15rem">Grand</option>
+                  <option value="1.35rem">Très grand</option>
+                  <option value="1.7rem">Accent</option>
+                </select>
+              </label>
+              <label for="floatLineHeightSelect">Interligne
+                <select id="floatLineHeightSelect">
+                  <option value="">Auto</option>
+                  <option value="1.2">Serré</option>
+                  <option value="1.45">Normal</option>
+                  <option value="1.7">Aéré</option>
+                </select>
+              </label>
+              <label for="floatTextAlignSelect">Alignement
+                <select id="floatTextAlignSelect">
+                  <option value="">Auto</option>
+                  <option value="left">Gauche</option>
+                  <option value="center">Centre</option>
+                  <option value="right">Droite</option>
+                </select>
+              </label>
+              <label for="floatLetterSpacingRange">Espacement
+                <input id="floatLetterSpacingRange" type="range" min="0" max="2" step="0.1" value="0">
+              </label>
+              <button id="floatClearTextStyleBtn" class="button secondary" type="button">Réinitialiser</button>
+            </div>
+
+            <article id="portalPreview" class="portal-preview" aria-label="Aperçu du portail artiste généré"></article>
+
+            <section id="shareKitPanel" class="share-kit" aria-labelledby="share-kit-title" hidden>
+              <div class="share-kit-head">
+                <div>
+                  <p class="eyebrow">Étape 3 · Partage</p>
+                  <h3 id="share-kit-title">Partager mon portail</h3>
+                  <p>Préparez des textes et visuels pour vos réseaux. Rien n'est publié automatiquement : vous gardez toujours la main.</p>
+                </div>
+                <div class="share-kit-actions">
+                  <button id="nativeShareBtn" class="button secondary" type="button">Partager</button>
+                  <button id="downloadSocialCardBtn" class="button secondary" type="button">Carte visuelle</button>
+                  <button id="downloadShareKitBtn" class="button secondary" type="button">Kit social</button>
+                </div>
+              </div>
+
+              <label class="share-url-field" for="portalPublicUrl">
+                <span>Lien public du portail</span>
+                <input id="portalPublicUrl" type="url" placeholder="https://votre-site.example/portfolio">
+              </label>
+              <div class="actions compact">
+                <button id="copyPortalUrlBtn" class="button secondary" type="button">Copier le lien</button>
+                <span class="share-note">À coller dans LinkedIn, Instagram bio, Facebook, TikTok bio ou Clap Talents.</span>
+              </div>
+
+              <div class="share-grid">
+                <article>
+                  <h4>LinkedIn</h4>
+                  <textarea id="shareLinkedinText" rows="7" readonly></textarea>
+                  <button class="button secondary" type="button" data-copy-share="shareLinkedinText">Copier</button>
+                </article>
+                <article>
+                  <h4>Instagram bio</h4>
+                  <textarea id="shareInstagramText" rows="7" readonly></textarea>
+                  <button class="button secondary" type="button" data-copy-share="shareInstagramText">Copier</button>
+                </article>
+                <article>
+                  <h4>Facebook</h4>
+                  <textarea id="shareFacebookText" rows="7" readonly></textarea>
+                  <button class="button secondary" type="button" data-copy-share="shareFacebookText">Copier</button>
+                </article>
+                <article>
+                  <h4>TikTok bio</h4>
+                  <textarea id="shareTiktokText" rows="7" readonly></textarea>
+                  <button class="button secondary" type="button" data-copy-share="shareTiktokText">Copier</button>
+                </article>
+              </div>
+
+              <canvas id="socialCardCanvas" width="1080" height="1080" aria-label="Carte visuelle pour partager le portail"></canvas>
+            </section>
+
+            <div class="review-note">
+              <strong data-i18n="review.title">Avant de publier</strong>
+              <label><input type="checkbox" class="review-check"> <span data-i18n="review.accurate">Les informations de parcours sont exactes.</span></label>
+              <label><input type="checkbox" class="review-check"> <span data-i18n="review.rights">Les images peuvent être utilisées.</span></label>
+              <label><input type="checkbox" class="review-check"> <span data-i18n="review.proof">Le texte a été relu ou ajusté par l'artiste.</span></label>
+            </div>
+
+            <div class="actions">
+              <button id="clearBtn" class="button danger" type="button" data-i18n="btn.clear">Effacer le contenu local</button>
+            </div>
+          </section>
+        </div>
+      </section>
+
+      <section id="uses" class="info-band" aria-labelledby="uses-title">
+        <p class="eyebrow" data-i18n="uses.eyebrow">À quoi ça sert</p>
+        <h2 id="uses-title" data-i18n="uses.title">Ce que votre portail vous permet de faire</h2>
+        <div class="info-grid use-grid">
+          <article>
+            <h3 data-i18n="uses.apply.title">Candidater</h3>
+            <p data-i18n="uses.apply.text">Postulez à des résidences, appels à projets et expositions avec une page à jour, claire et prête à partager.</p>
+          </article>
+          <article>
+            <h3 data-i18n="uses.present.title">Présenter</h3>
+            <p data-i18n="uses.present.text">Réunissez un press kit lisible — présentation, œuvres, parcours et contact — exportable en HTML ou imprimable en un clic.</p>
+          </article>
+          <article>
+            <h3 data-i18n="uses.gather.title">Rassembler</h3>
+            <p data-i18n="uses.gather.text">Centralisez vos œuvres, vos liens et vos contacts à une seule adresse, indépendante des plateformes sociales.</p>
+          </article>
+        </div>
+      </section>
+
+      <section id="compliance" class="info-band" aria-labelledby="compliance-title">
+        <p class="eyebrow" data-i18n="compliance.eyebrow">Posture service public</p>
+        <h2 id="compliance-title" data-i18n="compliance.title">Des repères pour créer en confiance</h2>
+        <div class="info-grid">
+          <article>
+            <h3 data-i18n="compliance.c1t">Pas un outil de sélection</h3>
+            <p data-i18n="compliance.c1p">Le prototype aide uniquement à présenter un parcours artistique. Il ne classe pas les personnes et ne prend aucune décision automatique.</p>
+          </article>
+          <article>
+            <h3 data-i18n="compliance.c2t">Validation par l'artiste</h3>
+            <p data-i18n="compliance.c2p">Chaque texte généré reste modifiable. Avant publication, l'artiste garde la main sur les faits, le ton et les images.</p>
+          </article>
+          <article>
+            <h3 data-i18n="compliance.c3t">Données et droits d'image</h3>
+            <p data-i18n="compliance.c3p">Le prototype sauvegarde localement. Un service réel devra prévoir information, export, suppression et confirmation des droits.</p>
+          </article>
+          <article>
+            <h3 data-i18n="compliance.c4t">Accessibilité</h3>
+            <p data-i18n="compliance.c4p">La page utilise une structure lisible, des contrôles accessibles au clavier, des focus visibles et des textes alternatifs.</p>
+          </article>
+        </div>
+      </section>
+
+      <section id="research" class="info-band quiet" aria-labelledby="research-title">
+        <p class="eyebrow" data-i18n="research.eyebrow">Cadre de recherche</p>
+        <h2 id="research-title" data-i18n="research.title">Pourquoi un portail personnel ?</h2>
+        <p data-i18n="research.text">
+          Un portail personnel peut devenir une infrastructure d'identité professionnelle : il rassemble œuvres, parcours et contacts,
+          tout en réduisant la dépendance aux plateformes sociales et à leurs algorithmes.
+        </p>
+      </section>
+    </main>
+
+    <template id="emptyPreviewTemplate">
+      <div class="empty-preview">
+        <canvas width="520" height="320" aria-label="Illustration d'attente pour l'aperçu"></canvas>
+        <h3 data-i18n="empty.title">Votre page apparaîtra ici</h3>
+        <p data-i18n="empty.text">Écrivez quelques phrases, ou essayez avec l'exemple, puis créez votre page.</p>
+      </div>
+    </template>
+
+    <script src="app.js"></script>
+  </body>
+</html>

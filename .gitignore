@@ -1,0 +1,11 @@
+# Outils locaux Claude Code (non nécessaires au site)
+.claude/
+
+# macOS
+.DS_Store
+
+# Rapports de recherche / thèse — décommentez pour les versionner,
+# sinon ils ne sont PAS publiés avec le site.
+rapport_recherche_portail_artiste_fr.md
+rapport_recherche_portail_artiste_en.md
+rapport_recherche_portail_artiste_zh.md
