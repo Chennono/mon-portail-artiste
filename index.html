@@ -366,11 +366,19 @@
                 <div>
                   <p class="eyebrow">Étape 3 · Partage</p>
                   <h3 id="share-kit-title">Partager mon portail</h3>
-                  <p data-i18n="share.publishNote">Publiez votre page avec ses images, puis récupérez immédiatement un lien à partager.</p>
+                  <p data-i18n="share.publishNote">Publiez votre page avec ses images. Votre adresse personnelle restera la même lors des prochaines mises à jour.</p>
                 </div>
               </div>
-              <button id="publishBtn" class="button primary publish-link-btn" type="button" data-i18n="publish.btn">Copier le lien de ma page</button>
-              <p class="share-note" data-i18n="share.retentionNote">La page publiée inclut vos images. Le lien reste disponible pendant 90 jours.</p>
+              <div class="publish-actions">
+                <button id="publishBtn" class="button primary publish-link-btn" type="button" data-i18n="publish.btn">Publier ma page</button>
+                <p id="publishStatus" class="publish-status" role="status" aria-live="polite"></p>
+              </div>
+              <div id="publishedPortal" class="published-portal" hidden>
+                <span data-i18n="publish.urlLabel">Votre adresse personnelle</span>
+                <a id="publishedPortalLink" href="#" target="_blank" rel="noreferrer"></a>
+                <button id="copyPublishedUrlBtn" class="button secondary" type="button" data-i18n="publish.copyBtn">Copier le lien</button>
+              </div>
+              <p class="share-note" data-i18n="share.retentionNote">Cette adresse ne change pas et la page n'expire plus automatiquement.</p>
             </section>
 
             <div class="review-note">

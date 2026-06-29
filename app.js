@@ -22,6 +22,8 @@ const state = {
   fontTitle: "default",
   fontBody: "default",
   shareUrl: "",
+  publishId: "",
+  publishToken: "",
   pageStyle: "minimal",
   motionStyle: "subtle",
   listening: false,
@@ -134,9 +136,9 @@ const I18N = {
     "share.copied": "Link copied! Paste it anywhere — it opens your page directly.",
     "share.copiedNoImg": "Link copied! Uploaded photos aren't included (link too long); text and style are. For a page with photos, use \"Export HTML\".",
     "share.needPage": "Create your page first, then copy the shareable link.",
-    "share.publishNote": "Publish your page with its images, then immediately get a link to share.",
-    "share.retentionNote": "The published page includes your images. The link remains available for 90 days.",
-    "publish.btn": "Copy my page link", "publish.inProgress": "Creating the link…", "publish.done": "Your page is online! The link, including your images, has been copied.", "publish.failed": "Publishing failed:", "publish.needPage": "Create your page first, then copy its link.", "publish.notConfigured": "The publishing service is not configured yet.",
+    "share.publishNote": "Publish your page with its images. Your personal address stays the same for future updates.",
+    "share.retentionNote": "This address does not change and the page no longer expires automatically.",
+    "publish.btn": "Publish my page", "publish.updateBtn": "Update my published page", "publish.inProgress": "Publishing…", "publish.done": "Your page is online! Its permanent link has been copied.", "publish.updated": "Your page has been updated at the same address. The link has been copied.", "publish.failed": "Publishing failed:", "publish.needPage": "Create your page first, then publish it.", "publish.notConfigured": "The publishing service is not configured yet.", "publish.reviewRequired": "Before publishing, please tick the three verification boxes below.", "publish.ready": "Everything is ready. You can publish your page.", "publish.urlLabel": "Your personal address", "publish.copyBtn": "Copy link", "publish.copied": "Permanent link copied.",
     "studio.intro": "Go at your own pace: tell us about your background, your works, your goals. The assistant prepares a clear draft — generated locally in your browser by default — that you can review, edit and export.",
     "hero.problem": "Today, many performing-arts professionals only exist online through social networks and their algorithms. A personal portal gives you back a stable space of your own to show your work.",
     "trust.unofficial": "Unofficial", "trust.rgaa": "RGAA accessibility", "trust.human": "Human validation", "trust.export": "Exportable",
@@ -227,9 +229,9 @@ const I18N = {
     "share.copied": "链接已复制!粘贴到任何地方都能直接打开你的页面。",
     "share.copiedNoImg": "链接已复制!上传的照片未包含(链接过长),但文本和样式已包含。需要带照片的页面请用“导出 HTML”。",
     "share.needPage": "请先创建页面,再复制可分享链接。",
-    "share.publishNote": "发布包含图片的个人页面，并立即获得可分享链接。",
-    "share.retentionNote": "发布的页面会包含你的图片，链接有效期为 90 天。",
-    "publish.btn": "复制个人网页链接", "publish.inProgress": "正在生成链接……", "publish.done": "个人网页已发布，包含图片的链接已复制。", "publish.failed": "发布失败:", "publish.needPage": "请先创建个人页面，再复制链接。", "publish.notConfigured": "发布服务尚未配置。",
+    "share.publishNote": "发布包含图片的个人页面。以后更新页面时，你的个人网址不会改变。",
+    "share.retentionNote": "这个网址不会改变，页面也不再自动过期。",
+    "publish.btn": "发布我的页面", "publish.updateBtn": "更新已发布页面", "publish.inProgress": "正在发布……", "publish.done": "个人页面已上线，固定网址已复制。", "publish.updated": "页面已在同一网址更新，链接已复制。", "publish.failed": "发布失败:", "publish.needPage": "请先创建个人页面，再进行发布。", "publish.notConfigured": "发布服务尚未配置。", "publish.reviewRequired": "发布前，请先勾选下方三个确认选项。", "publish.ready": "准备完成，现在可以发布页面。", "publish.urlLabel": "你的个人网址", "publish.copyBtn": "复制链接", "publish.copied": "固定网址已复制。",
     "studio.intro": "按自己的节奏来:讲讲你的经历、作品和愿望。助手会准备一份清晰的草稿——默认在你的浏览器本地生成——你可以审阅、修改并导出。",
     "hero.problem": "如今,许多演艺从业者只能通过社交网络及其算法在线“存在”。一个个人门户让你重新拥有一个属于自己的稳定空间来展示作品。",
     "trust.unofficial": "非官方", "trust.rgaa": "RGAA 无障碍", "trust.human": "人工审核", "trust.export": "可导出",
@@ -383,14 +385,21 @@ function captureFrench() {
     "share.copied": "Lien copié ! Collez-le n'importe où : il ouvre votre page directement.",
     "share.copiedNoImg": "Lien copié ! Les photos importées ne sont pas incluses (lien trop long) ; les textes et le style le sont. Pour une page avec photos, utilisez « Exporter HTML ».",
     "share.needPage": "Créez d'abord votre page, puis copiez le lien partageable.",
-    "share.publishNote": "Publiez votre page avec ses images, puis récupérez immédiatement un lien à partager.",
-    "share.retentionNote": "La page publiée inclut vos images. Le lien reste disponible pendant 90 jours.",
-    "publish.btn": "Copier le lien de ma page",
-    "publish.inProgress": "Création du lien…",
-    "publish.done": "Votre page est en ligne ! Le lien, avec vos images, a été copié.",
+    "share.publishNote": "Publiez votre page avec ses images. Votre adresse personnelle restera la même lors des prochaines mises à jour.",
+    "share.retentionNote": "Cette adresse ne change pas et la page n'expire plus automatiquement.",
+    "publish.btn": "Publier ma page",
+    "publish.updateBtn": "Mettre à jour ma page publiée",
+    "publish.inProgress": "Publication…",
+    "publish.done": "Votre page est en ligne ! Son lien permanent a été copié.",
+    "publish.updated": "Votre page a été mise à jour à la même adresse. Le lien a été copié.",
     "publish.failed": "La publication a échoué :",
-    "publish.needPage": "Créez d'abord votre page, puis copiez son lien.",
-    "publish.notConfigured": "Le service de publication n'est pas encore configuré."
+    "publish.needPage": "Créez d'abord votre page, puis publiez-la.",
+    "publish.notConfigured": "Le service de publication n'est pas encore configuré.",
+    "publish.reviewRequired": "Avant de publier, cochez les trois points de vérification ci-dessous.",
+    "publish.ready": "Tout est prêt. Vous pouvez publier votre page.",
+    "publish.urlLabel": "Votre adresse personnelle",
+    "publish.copyBtn": "Copier le lien",
+    "publish.copied": "Lien permanent copié."
   });
 }
 
@@ -425,6 +434,7 @@ function applyLanguage(lang) {
   renderWorksInput();
   renderMessages();
   syncExtraLabel();
+  renderShareKit();
   try {
     localStorage.setItem(LANG_KEY, currentLang);
   } catch {
@@ -852,7 +862,17 @@ function bindEvents() {
 
   $("#llmEndpoint").addEventListener("input", persist);
   $("#publishBtn").addEventListener("click", publishPage);
+  $("#copyPublishedUrlBtn").addEventListener("click", () => copyText(state.shareUrl, t("publish.copied")));
   if (!PUBLISH_ENDPOINT) $("#publishBtn").hidden = true;
+  $$(".review-check").forEach((check) => {
+    check.addEventListener("change", () => {
+      const reviewNote = check.closest(".review-note");
+      if ($$(".review-check").every((item) => item.checked)) {
+        reviewNote?.classList.remove("review-needed");
+        setPublishStatus(t("publish.ready"), "success");
+      }
+    });
+  });
   document.addEventListener("selectionchange", trackPreviewSelection);
   document.addEventListener("mousedown", maybeHideTextToolbar);
   document.addEventListener("dragover", updateModuleAutoScroll);
@@ -2429,6 +2449,53 @@ function renderShareKit() {
   const panel = $("#shareKitPanel");
   if (!panel) return;
   panel.hidden = !state.draft;
+  if (!state.draft) return;
+
+  const button = $("#publishBtn");
+  if (button && !button.disabled) {
+    const key = state.publishId ? "publish.updateBtn" : "publish.btn";
+    button.dataset.i18n = key;
+    button.textContent = t(key);
+  }
+
+  const publishedPortal = $("#publishedPortal");
+  const publishedLink = $("#publishedPortalLink");
+  const hasPublishedUrl = Boolean(state.shareUrl && state.publishId && state.publishToken);
+  publishedPortal.hidden = !hasPublishedUrl;
+  if (hasPublishedUrl) {
+    publishedLink.href = state.shareUrl;
+    publishedLink.textContent = state.shareUrl;
+  }
+}
+
+function setPublishStatus(message, tone = "") {
+  const publishStatus = $("#publishStatus");
+  if (!publishStatus) return;
+  publishStatus.textContent = message;
+  publishStatus.className = `publish-status${tone ? ` ${tone}` : ""}`;
+}
+
+function publishingReviewReady() {
+  const checks = $$(".review-check");
+  const firstUnchecked = checks.find((check) => !check.checked);
+  if (!firstUnchecked) return true;
+  const reviewNote = firstUnchecked.closest(".review-note");
+  reviewNote?.classList.add("review-needed");
+  setPublishStatus(t("publish.reviewRequired"), "error");
+  setStatus(t("publish.reviewRequired"));
+  reviewNote?.scrollIntoView({ behavior: "smooth", block: "center" });
+  firstUnchecked.focus({ preventScroll: true });
+  return false;
+}
+
+function personalizedPortalSlug(value) {
+  return String(value || "artiste")
+    .toLocaleLowerCase("fr")
+    .normalize("NFKD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^\p{Letter}\p{Number}]+/gu, "-")
+    .replace(/(^-|-$)/g, "")
+    .slice(0, 48) || "artiste";
 }
 
 async function copyText(value, message = "Copié.") {
@@ -2793,15 +2860,23 @@ async function publishPage() {
     setStatus(t("publish.notConfigured"));
     return;
   }
-  if (!reviewConfirmed()) return;
+  if (!publishingReviewReady()) return;
   const button = $("#publishBtn");
+  const wasPublished = Boolean(state.publishId && state.publishToken);
+  let published = false;
   try {
     setBusy(button, true, t("publish.inProgress"));
+    setPublishStatus(t("publish.inProgress"));
     const html = buildPortalHtmlDocument();
     const response = await fetch(`${PUBLISH_ENDPOINT.replace(/\/$/, "")}/publish`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ html })
+      body: JSON.stringify({
+        html,
+        slug: personalizedPortalSlug(state.draft.name),
+        id: state.publishId || undefined,
+        editToken: state.publishToken || undefined
+      })
     });
     if (!response.ok) {
       const detail = await response.json().catch(() => ({}));
@@ -2809,13 +2884,20 @@ async function publishPage() {
     }
     const payload = await response.json();
     state.shareUrl = payload.url;
-    renderShareKit();
+    state.publishId = payload.id;
+    state.publishToken = payload.editToken || state.publishToken;
     persist();
-    await copyText(payload.url, t("publish.done"));
+    published = true;
+    const successMessage = wasPublished ? t("publish.updated") : t("publish.done");
+    setPublishStatus(successMessage, "success");
+    await copyText(payload.url, successMessage);
   } catch (error) {
-    setStatus(`${t("publish.failed")} ${error.message}`);
+    const message = `${t("publish.failed")} ${error.message}`;
+    setPublishStatus(message, "error");
+    setStatus(message);
   } finally {
     setBusy(button, false);
+    if (published) renderShareKit();
   }
 }
 
@@ -2909,6 +2991,8 @@ function clearLocalData() {
   state.fontTitle = "default";
   state.fontBody = "default";
   state.shareUrl = "";
+  state.publishId = "";
+  state.publishToken = "";
   $("#titleFont").value = "default";
   $("#bodyFont").value = "default";
   state.guided = { active: false, step: 0 };
@@ -2953,6 +3037,8 @@ function persist() {
     fontTitle: state.fontTitle,
     fontBody: state.fontBody,
     shareUrl: state.shareUrl,
+    publishId: state.publishId,
+    publishToken: state.publishToken,
     guided: state.guided,
     guidedAnswers: state.guidedAnswers,
     extra: state.extra,
@@ -2993,6 +3079,8 @@ function loadState() {
     state.fontTitle = saved.fontTitle || "default";
     state.fontBody = saved.fontBody || "default";
     state.shareUrl = saved.shareUrl || "";
+    state.publishId = saved.publishId || "";
+    state.publishToken = saved.publishToken || "";
     $("#titleFont").value = state.fontTitle;
     $("#bodyFont").value = state.fontBody;
     state.guided = saved.guided && typeof saved.guided === "object" ? saved.guided : { active: false, step: 0 };

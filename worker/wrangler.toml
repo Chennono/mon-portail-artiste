@@ -1,6 +1,7 @@
 name = "mon-portail-artiste-publish"
 main = "worker.js"
-compatibility_date = "2024-11-01"
+compatibility_date = "2026-06-29"
+compatibility_flags = ["nodejs_compat"]
 
 # KV : créez le namespace puis collez l'id ci-dessous (voir README.md).
 #   npx wrangler kv namespace create PORTAILS
